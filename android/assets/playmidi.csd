@@ -40,7 +40,7 @@ iSfNum2      fluidLoad          "synthgms.sf2", giEngine2, 1         ; load a so
     aSigL1,aSigR1      fluidOut          giEngine1; read all audio from the given soundfont
     aSigL2,aSigR2      fluidOut          giEngine2; read all audio from the given soundfont
     outs               (aSigL1 * kamplitude1) + (aSigL2 * kamplitude2), \
-                       (aSigR1 * kamplitude1) + (aSigR2 * kamplitude2)
+                       (aSigR1 * kamplitude1) + (aSigR2 * k4amplitude2)
   endin
 
 </CsInstruments>

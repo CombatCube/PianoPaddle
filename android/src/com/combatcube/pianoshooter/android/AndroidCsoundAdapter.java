@@ -5,6 +5,12 @@ import com.combatcube.pianoshooter.CsoundAdapter;
 import com.csounds.CsoundObj;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import csnd6.Csound;
+import csnd6.CsoundMYFLTArray;
+import csnd6.controlChannelType;
 
 /**
  * Created by andrew on 12/26/2015.
@@ -13,6 +19,8 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
 
     static String OPCODE6DIR;
     private CsoundObj csoundObj;
+    private CsoundMYFLTArray ampChannel;
+    private Thread perfThread;
 
     public AndroidCsoundAdapter(String nativeLibraryDir) {
         OPCODE6DIR = nativeLibraryDir;
@@ -21,22 +29,57 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
     }
 
     @Override
+    public void play() {
+        ampChannel = csoundObj.getInputChannelPtr("amp", controlChannelType.CSOUND_CONTROL_CHANNEL);
+        perfThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!csoundObj.isStopped()) {
+                    ampChannel.SetValue(0, amp);
+                }
+            }
+        });
+        csoundObj.play();
+        perfThread.start();
+    }
+
+    @Override
+    public double getTime() {
+        return csoundObj.getCsound().GetScoreTime();
+    }
+
+    @Override
     public void load() {
         csoundObj.getCsound().SetOption("-odac");
         csoundObj.getCsound().SetOption("-B512");
         csoundObj.getCsound().SetOption("-+rtmidi=null");
         csoundObj.getCsound().SetOption("-+rtaudio=alsa");
-        csoundObj.startCsound(Gdx.files.local("tmp/playmidi.csd").file());
     }
 
     @Override
-    public void setTempo(float tempo) {
-        csoundObj.inputMessage("t 0 " + tempo);
+    public void playNote(int inst, double duration, int pitch) {
+        csoundObj.inputMessage(String.format(iStatement, inst, 0, duration, pitch));
     }
 
     @Override
-    public void scheduleNote(int inst, double onTime, double duration, int pitch) {
-        csoundObj.inputMessage("i " + inst + " 0 " + duration + " " + pitch + " 100");
+    public void setupScore() {
+        createTempFile(
+                "<CsoundSynthesizer>\n" +
+                        "\n" +
+                        "<CsInstruments>\n" +
+                        ORCHESTRA + "\n" +
+                        "</CsInstruments>\n" +
+                        "<CsScore>\n" +
+                        "i 99 0 360; audio output instrument also keeps performance going\n" +
+                        score + "\n" +
+                        "e\n" +
+                        "</CsScore>\n" +
+                        "\n" +
+                        "</CsoundSynthesizer>"
+        );
+        csoundObj.startCsound(Gdx.files.local("tmp/temp.csd").file());
+        csoundObj.pause();
+
     }
 
     private void initCsoundObj() {
@@ -53,5 +96,21 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
         // This must be set before the Csound object is created.
         csnd6.csndJNI.csoundSetGlobalEnv("OPCODE6DIR", OPCODE6DIR);
         csoundObj = new CsoundObj();
+    }
+
+    protected File createTempFile(String csd) {
+        File f = null;
+
+        try {
+            f = Gdx.files.local("tmp/temp.csd").file();
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(csd.getBytes());
+            fos.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return f;
     }
 }

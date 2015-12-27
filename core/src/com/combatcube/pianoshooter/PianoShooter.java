@@ -132,10 +132,10 @@ public class PianoShooter extends Game {
             if (!noteBox.passed && noteBox.rect.y <= currentTick) {
                 if (noteBox.rect.overlaps(shooter.getRect())) {
 //                    csoundAdapter.playNote(11, ticksToSeconds(noteBox.note.duration), noteBox.note.pitch);
-                    csoundAdapter.setChannel("amp", 1.0);
+                    csoundAdapter.setAmpValue(1.0);
                     noteBox.touched = true;
                 } else {
-                    csoundAdapter.setChannel("amp", 0.3);
+                    csoundAdapter.setAmpValue(0.3);
                 }
                 noteBox.passed = true;
             }
@@ -223,9 +223,10 @@ public class PianoShooter extends Game {
                 for (Note note : otherNoteMap.getNotes()) {
                     csoundAdapter.scheduleNote(12, ticksToSeconds((double) note.onTime + COUNT_IN*ppq), ticksToSeconds((double) note.duration), note.pitch);
                 }
-                startTime = TimeUtils.millis();
+                csoundAdapter.setupScore();
                 isPlaying = true;
                 csoundAdapter.play();
+                startTime = TimeUtils.millis();
                 // Correction factor = time since starting - actual time
                 long offset = (long) (TimeUtils.timeSinceMillis(startTime)
                                 - (csoundAdapter.getTime() * MILLIS_PER_S));
