@@ -27,5 +27,8 @@ public abstract class CsoundAdapter {
     public abstract double getTime();
     public abstract void load();
     public abstract void playNote(int inst, double duration, int pitch);
+
+    public abstract void setChannel(String channel, double value);
+
     public abstract void scheduleNote(int inst, double onTime, double duration, int pitch);
 }
