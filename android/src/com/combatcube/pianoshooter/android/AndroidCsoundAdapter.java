@@ -35,7 +35,7 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
     }
 
     @Override
-    public void playNote(int inst, float onTime, float duration, int pitch) {
+    public void scheduleNote(int inst, double onTime, double duration, int pitch) {
         csoundObj.inputMessage("i " + inst + " 0 " + duration + " " + pitch + " 100");
     }
 

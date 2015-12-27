@@ -26,6 +26,6 @@ public abstract class CsoundAdapter {
     public abstract void play();
     public abstract double getTime();
     public abstract void load();
-    public abstract void setTempo(float tempo);
-    public abstract void playNote(int inst, float onTime, float duration, int pitch);
+    public abstract void playNote(int inst, double duration, int pitch);
+    public abstract void scheduleNote(int inst, double onTime, double duration, int pitch);
 }

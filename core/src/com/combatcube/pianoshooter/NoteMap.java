@@ -56,7 +56,8 @@ public class NoteMap {
                         notes.add(new Note(
                                         noteValue,
                                         noteOn.getTick(),
-                                        noteOff.getTick() - noteOn.getTick())
+                                        noteOff.getTick() - noteOn.getTick()
+                                )
                         );
                     };
                 }
@@ -76,5 +77,4 @@ public class NoteMap {
     public Array<Note> getNotes() {
         return notes;
     }
-
 }

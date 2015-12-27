@@ -41,7 +41,6 @@ iSfNum1      fluidLoad          "synthgms.sf2", giEngine, 1         ; load a sou
 </CsInstruments>
 
 <CsScore>
-t 0 115
 i 99 0 360; audio output instrument also keeps performance going
 e
 </CsScore>

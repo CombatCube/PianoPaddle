@@ -24,7 +24,7 @@ public class Shooter {
         updateTouchBox();
     }
 
-    public void moveY(long tick) {
+    public void moveY(float tick) {
         rect.setY(tick);
         updateTouchBox();
     }
