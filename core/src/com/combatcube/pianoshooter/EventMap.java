@@ -5,29 +5,30 @@ import com.leff.midi.MidiTrack;
 import com.leff.midi.event.MidiEvent;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
+import com.leff.midi.event.meta.KeySignature;
 import com.leff.midi.event.meta.Tempo;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.TreeSet;
 
 /**
+ * Class to hold time-based events.
  * Created by andrew on 12/25/2015.
  */
-public class NoteMap {
-    private TreeSet<Tempo> tempoMap;
+public class EventMap {
+    public Array<Event> events;
+    public Array<Note> noteEvents;
     public int minNote;
     public int maxNote;
-    private Array<Note> notes;
 
-    public NoteMap() {
-        tempoMap = new TreeSet<Tempo>();
-        notes = new Array<Note>();
+    public EventMap() {
+        events = new Array<Event>();
+        noteEvents = new Array<Note>();
         minNote = Integer.MAX_VALUE;
         maxNote = Integer.MIN_VALUE;
     }
 
-    public NoteMap(MidiTrack track) {
+    public EventMap(MidiTrack track) {
         this();
         if (track != null) {
             Iterator<MidiEvent> it = track.getEvents().iterator();
@@ -36,7 +37,12 @@ public class NoteMap {
                 MidiEvent event = it.next();
                 if (event instanceof Tempo) {
                     Tempo tempo = (Tempo) event;
-                    tempoMap.add(tempo);
+                    events.add(new TempoChange(tempo.getTick(), tempo.getBpm()));
+                }
+                if (event instanceof KeySignature) {
+                    KeySignature keySig = (KeySignature) event;
+                    events.add(new KeyChange(keySig.getTick(),
+                            new Key(PitchClass.C.successor(keySig.getKey()))));
                 }
                 if (event instanceof NoteOn) {
                     NoteOn noteOn = (NoteOn) event;
@@ -53,28 +59,18 @@ public class NoteMap {
                     int noteValue = noteOff.getNoteValue();
                     if (noteOns.get(noteValue) != null) {
                         NoteOn noteOn = noteOns.remove(noteValue);
-                        notes.add(new Note(
-                                        noteValue,
-                                        noteOn.getTick(),
-                                        noteOff.getTick() - noteOn.getTick()
-                                )
-                        );
-                    };
+                        Note note = new Note(
+                                noteValue,
+                                noteOn.getTick(),
+                                noteOff.getTick() - noteOn.getTick(),
+                                noteOn.getVelocity());
+                        events.add(note);
+                        noteEvents.add(note);
+                    }
                 }
             }
         }
-        notes.sort();
-    }
-
-    public TreeSet<Tempo> getTempoMap() {
-        return tempoMap;
-    }
-
-    public void setTempoMap(TreeSet<Tempo> tempoMap) {
-        this.tempoMap = tempoMap;
-    }
-
-    public Array<Note> getNotes() {
-        return notes;
+        events.sort();
+        noteEvents.sort();
     }
 }

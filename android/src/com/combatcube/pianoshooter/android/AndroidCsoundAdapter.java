@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import csnd6.Csound;
 import csnd6.CsoundMYFLTArray;
 import csnd6.controlChannelType;
 
@@ -59,8 +58,8 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
     }
 
     @Override
-    public void playNote(int inst, double duration, int pitch) {
-        csoundObj.inputMessage(String.format(iStatement, inst, 0.0f, duration, pitch));
+    public void playNote(int inst, double duration, int pitch, int velocity) {
+        csoundObj.inputMessage(String.format(iStatement, inst, 0.0f, duration, pitch, velocity));
     }
 
     @Override
