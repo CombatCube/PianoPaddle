@@ -2,7 +2,9 @@ package com.combatcube.pianoshooter.desktop;
 
 import com.combatcube.pianoshooter.CsoundAdapter;
 
-import csnd6.*;
+import csnd6.Csound;
+import csnd6.CsoundMYFLTArray;
+import csnd6.controlChannelType;
 
 /**
  * Desktop implementation of Csound class.
@@ -54,8 +56,8 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
     }
 
     @Override
-    public void playNote(int inst, double duration, int pitch) {
-        csound.InputMessage(String.format(iStatement, inst, 0.0f, duration, pitch));
+    public void playNote(int inst, double duration, int pitch, int velocity) {
+        csound.InputMessage(String.format(iStatement, inst, 0.0f, duration, pitch, velocity));
     }
 
     @Override

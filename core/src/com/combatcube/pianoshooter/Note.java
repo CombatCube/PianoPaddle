@@ -1,23 +1,29 @@
 package com.combatcube.pianoshooter;
 
 /**
+ * Class to hold a note event.
  * Created by andrew on 12/25/2015.
  */
-public class Note implements Comparable<Note> {
+public class Note extends Event {
     public int pitch;
     public boolean diatonic;
-    public long onTime;
     public long duration;
+    public int velocity;
+    public boolean played;
+    public boolean missed;
 
-    public Note(int pitch, long onTime, long duration) {
+    public Note(int pitch, long onTime, long duration, int velocity) {
+        super(onTime);
         this.pitch = pitch;
         this.diatonic = false;
-        this.onTime = onTime;
         this.duration = duration;
+        this.velocity = velocity;
+        this.played = false;
+        this.missed = false;
     }
 
     @Override
-    public int compareTo(Note other) {
-        return Long.compare(this.onTime, other.onTime);
+    public void performEvent(SoundEngine engine) {
+        engine.playNote(this);
     }
 }

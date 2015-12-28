@@ -51,9 +51,14 @@ public abstract class CsoundAdapter {
             "    outs               (aSigL1 * kamplitude1) + (aSigL2 * kamplitude2), \\\n" +
             "                       (aSigR1 * kamplitude1) + (aSigR2 * kamplitude2)\n" +
             "  endin";
-    protected static final String iStatement = "i %d %f %f %d 100\n";
+    protected static final String iStatement = "i %d %f %f %d %d\n";
     protected String score = "";
     protected double amp = 1.0;
+
+    public static MidiFile loadMidi(String fileName) throws IOException {
+        Gdx.files.internal(fileName).copyTo(Gdx.files.local("tmp/tmp.mid"));
+        return new MidiFile(Gdx.files.local("tmp/tmp.mid").file());
+    }
 
     public void init() {
         Gdx.files.internal("playmidi.csd").copyTo(Gdx.files.local("tmp/playmidi.csd"));
@@ -62,18 +67,11 @@ public abstract class CsoundAdapter {
         }
     }
 
-    public static MidiFile loadMidi(String fileName) throws IOException {
-        Gdx.files.internal(fileName).copyTo(Gdx.files.local("tmp/tmp.mid"));
-        return new MidiFile(Gdx.files.local("tmp/tmp.mid").file());
-    }
-
     public abstract void start();
     public abstract double getTime();
     public abstract void load();
-    public abstract void playNote(int inst, double duration, int pitch);
-    public void scheduleNote(int inst, double onTime, double duration, int pitch) {
-        score += String.format(iStatement, inst, onTime, duration, pitch);
-    }
+
+    public abstract void playNote(int inst, double duration, int pitch, int velocity);
 
     public void setAmpValue(double value) {
         amp = value;
