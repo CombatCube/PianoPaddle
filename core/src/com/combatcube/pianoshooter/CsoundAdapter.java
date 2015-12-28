@@ -6,6 +6,7 @@ import com.leff.midi.MidiFile;
 import java.io.IOException;
 
 /**
+ * Adapter for Csound, a low-level sound processing engine
  * Created by andrew on 12/24/2015.
  */
 public abstract class CsoundAdapter {
@@ -63,11 +64,10 @@ public abstract class CsoundAdapter {
 
     public static MidiFile loadMidi(String fileName) throws IOException {
         Gdx.files.internal(fileName).copyTo(Gdx.files.local("tmp/tmp.mid"));
-        MidiFile midiFile = new MidiFile(Gdx.files.local("tmp/tmp.mid").file());
-        return midiFile;
+        return new MidiFile(Gdx.files.local("tmp/tmp.mid").file());
     }
 
-    public abstract void play();
+    public abstract void start();
     public abstract double getTime();
     public abstract void load();
     public abstract void playNote(int inst, double duration, int pitch);
@@ -79,5 +79,5 @@ public abstract class CsoundAdapter {
         amp = value;
     }
 
-    public abstract void setupScore();
+    public abstract void readScore();
 }

@@ -13,6 +13,7 @@ import csnd6.CsoundMYFLTArray;
 import csnd6.controlChannelType;
 
 /**
+ * Android implementation of Csound class.
  * Created by andrew on 12/26/2015.
  */
 public class AndroidCsoundAdapter extends CsoundAdapter {
@@ -29,7 +30,7 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
     }
 
     @Override
-    public void play() {
+    public void start() {
         ampChannel = csoundObj.getInputChannelPtr("amp", controlChannelType.CSOUND_CONTROL_CHANNEL);
         perfThread = new Thread(new Runnable() {
             @Override
@@ -51,18 +52,19 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
     @Override
     public void load() {
         csoundObj.getCsound().SetOption("-odac");
-        csoundObj.getCsound().SetOption("-B512");
+//        csoundObj.getCsound().SetOption("-B512");
+//        csoundObj.getCsound().SetOption("-B4096");
         csoundObj.getCsound().SetOption("-+rtmidi=null");
         csoundObj.getCsound().SetOption("-+rtaudio=alsa");
     }
 
     @Override
     public void playNote(int inst, double duration, int pitch) {
-        csoundObj.inputMessage(String.format(iStatement, inst, 0, duration, pitch));
+        csoundObj.inputMessage(String.format(iStatement, inst, 0.0f, duration, pitch));
     }
 
     @Override
-    public void setupScore() {
+    public void readScore() {
         createTempFile(
                 "<CsoundSynthesizer>\n" +
                         "\n" +
@@ -83,14 +85,14 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
     }
 
     private void initCsoundObj() {
-        File file = new File(OPCODE6DIR);
-        File[] files = file.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            String pluginPath = files[i].getAbsoluteFile()
-                    .toString();
+        File opcodeDir = new File(OPCODE6DIR);
+        File[] files = opcodeDir.listFiles();
+        for (File file : files) {
+            String pluginPath = file.getAbsoluteFile().toString();
             try {
                 System.load(pluginPath);
-            } catch (Throwable ex) {
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
         }
         // This must be set before the Csound object is created.
@@ -100,7 +102,6 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
 
     protected File createTempFile(String csd) {
         File f = null;
-
         try {
             f = Gdx.files.local("tmp/temp.csd").file();
             FileOutputStream fos = new FileOutputStream(f);
@@ -110,7 +111,6 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
         return f;
     }
 }

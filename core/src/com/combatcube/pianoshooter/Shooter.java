@@ -5,18 +5,20 @@ import com.badlogic.gdx.math.Rectangle;
 public class Shooter {
     private Rectangle rect;
     private Rectangle touchBox;
+    private boolean available;
 
     public Shooter(Rectangle rect) {
         this.rect = rect;
         this.touchBox = new Rectangle(rect);
+        this.available = true;
         updateTouchBox();
     }
 
 
     private void updateTouchBox() {
         touchBox.set(rect);
-        touchBox.setY(rect.y + rect.height - 5);
-        touchBox.setHeight(5);
+        touchBox.setY(rect.y + rect.height);
+        touchBox.setHeight(50);
     }
 
     public void moveX(float v) {
@@ -35,5 +37,30 @@ public class Shooter {
 
     public Rectangle getTouchBox() {
         return touchBox;
+    }
+
+    public float getCenterX() {
+        return rect.x + (rect.getWidth() / 2);
+    }
+
+    public void setWidth(int width) {
+        rect.width = width;
+    }
+
+    public boolean contains(NoteBox noteBox) {
+        return noteBox.rect.x < getRect().getX() + getRect().getWidth()
+                &&  noteBox.rect.x + noteBox.rect.getWidth() > getRect().getX();
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setIsAvailable(boolean isAvailable) {
+        this.available = isAvailable;
+    }
+
+    public void moveCenterX(float pos) {
+        moveX(pos - getRect().getWidth()/2);
     }
 }

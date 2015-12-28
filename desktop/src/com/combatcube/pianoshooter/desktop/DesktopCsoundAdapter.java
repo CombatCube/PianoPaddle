@@ -5,6 +5,7 @@ import com.combatcube.pianoshooter.CsoundAdapter;
 import csnd6.*;
 
 /**
+ * Desktop implementation of Csound class.
  * Created by andrew on 12/26/2015.
  */
 
@@ -21,7 +22,8 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
     @Override
     public void load() {
         csound.SetOption("-odac");
-        csound.SetOption("-B256");
+        csound.SetOption("-b512");
+        csound.SetOption("-B4096");
         csound.CompileOrc(ORCHESTRA);
         score = "i 99 0 360; audio output instrument also keeps performance going\n";
         ampChannel = new CsoundMYFLTArray(1);
@@ -32,7 +34,7 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
             @Override
             public void run() {
                 while (csound.PerformKsmps() == 0) {
-                    ampChannel.SetValue(0, amp);
+                    ampChannel.SetValue(0, 1.0);
 //                    double val = ampChannel.GetValue(0);
 //                    System.out.println(val);
                 }
@@ -41,7 +43,7 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
     }
 
     @Override
-    public void play() {
+    public void start() {
         csound.Start();
         perfThread.start();
     }
@@ -53,11 +55,11 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
 
     @Override
     public void playNote(int inst, double duration, int pitch) {
-        csound.InputMessage(String.format(iStatement, inst, 0, duration, pitch));
+        csound.InputMessage(String.format(iStatement, inst, 0.0f, duration, pitch));
     }
 
     @Override
-    public void setupScore() {
+    public void readScore() {
         csound.ReadScore(score);
     }
 }
