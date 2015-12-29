@@ -16,12 +16,13 @@
 
 package com.leff.midi.event.meta;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
+import com.combatcube.pianoshooter.EventVisitor;
 import com.leff.midi.event.MidiEvent;
 import com.leff.midi.util.MidiUtil;
 import com.leff.midi.util.VariableLengthInt;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class Tempo extends MetaEvent
 {
@@ -43,20 +44,30 @@ public class Tempo extends MetaEvent
         setMpqn(mpqn);
     }
 
+    public static MetaEvent parseTempo(long tick, long delta, MetaEventData info)
+    {
+        if (info.length.getValue() != 3) {
+            return new GenericMetaEvent(tick, delta, info);
+        }
+
+        int mpqn = MidiUtil.bytesToInt(info.data, 0, 3);
+
+        return new Tempo(tick, delta, mpqn);
+    }
+
     public int getMpqn()
     {
         return mMPQN;
-    }
-
-    public float getBpm()
-    {
-        return mBPM;
     }
 
     public void setMpqn(int m)
     {
         mMPQN = m;
         mBPM = 60000000.0f / mMPQN;
+    }
+
+    public float getBpm() {
+        return mBPM;
     }
 
     public void setBpm(float b)
@@ -78,18 +89,6 @@ public class Tempo extends MetaEvent
 
         out.write(3);
         out.write(MidiUtil.intToBytes(mMPQN, 3));
-    }
-
-    public static MetaEvent parseTempo(long tick, long delta, MetaEventData info)
-    {
-        if(info.length.getValue() != 3)
-        {
-            return new GenericMetaEvent(tick, delta, info);
-        }
-
-        int mpqn = MidiUtil.bytesToInt(info.data, 0, 3);
-
-        return new Tempo(tick, delta, mpqn);
     }
 
     @Override
@@ -116,5 +115,10 @@ public class Tempo extends MetaEvent
             return mMPQN < o.mMPQN ? -1 : 1;
         }
         return 0;
+    }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
     }
 }

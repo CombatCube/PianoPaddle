@@ -20,7 +20,7 @@ public class SoundEngine extends Thread {
     public static final int COUNT_IN = 4;
     private CsoundAdapter csoundAdapter;
 
-    private Key key = new Key(PitchClass.G_FLAT);
+    private Key key = new Key(PitchClass.C);
     private int range;
 
     private float bpm = 120;
@@ -38,7 +38,7 @@ public class SoundEngine extends Thread {
         this.csoundAdapter = csoundAdapter;
         csoundAdapter.init();
         try {
-            midiFile = CsoundAdapter.loadMidi("Death_by_Glamour.mid");
+            midiFile = CsoundAdapter.loadMidi("Spider_Dance.mid");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,20 +90,21 @@ public class SoundEngine extends Thread {
 
     @Override
     public void run() {
+        EventVisitor visitor = new PerformEventVisitor(this);
         csoundAdapter.readScore();
         isPlaying = true;
         csoundAdapter.start();
         long prevTime = TimeUtils.millis();
-        Iterator<Event> it = eventMap.events.iterator();
-        Event nextEvent = it.next(); //assumes first note exists
+        Iterator<MidiEvent> it = eventMap.events.iterator();
+        MidiEvent nextEvent = it.next(); //assumes first note exists
         while (isPlaying) {
             long newTime = TimeUtils.millis();
             currentTick += secondsToTicks((newTime - prevTime) / (double) MILLIS_PER_S);
             prevTime = newTime;
             if (nextEvent != null) {
-                if (nextEvent.tick < currentTick
-                        || (nextEvent instanceof KeyChange)) {
-                    nextEvent.performEvent(this);
+                if (nextEvent.getTick() < currentTick
+                        || (nextEvent instanceof KeySignature)) {
+                    nextEvent.accept(visitor);
                     if (it.hasNext()) {
                         nextEvent = it.next();
                     } else {
@@ -144,8 +145,8 @@ public class SoundEngine extends Thread {
         return range;
     }
 
-    public void playNote(Note note) {
-        csoundAdapter.playNote(12, ticksToSeconds(note.duration), note.pitch, note.velocity);
+    public void playNote(int inst, int duration, int pitch, int velocity) {
+        csoundAdapter.playNote(inst, ticksToSeconds(duration), pitch, velocity);
     }
 
     public EventMap getEventMap() {

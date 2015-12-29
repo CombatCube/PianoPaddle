@@ -16,11 +16,12 @@
 
 package com.leff.midi.event.meta;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
+import com.combatcube.pianoshooter.EventVisitor;
 import com.leff.midi.event.MidiEvent;
 import com.leff.midi.util.VariableLengthInt;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class TimeSignature extends MetaEvent
 {
@@ -47,6 +48,21 @@ public class TimeSignature extends MetaEvent
         super(tick, delta, MetaEvent.TIME_SIGNATURE, new VariableLengthInt(4));
 
         setTimeSignature(num, den, meter, div);
+    }
+
+    public static MetaEvent parseTimeSignature(long tick, long delta, MetaEventData info) {
+        if (info.length.getValue() != 4) {
+            return new GenericMetaEvent(tick, delta, info);
+        }
+
+        int num = info.data[0];
+        int den = info.data[1];
+        int met = info.data[2];
+        int fps = info.data[3];
+
+        den = (int) Math.pow(2, den);
+
+        return new TimeSignature(tick, delta, num, den, met, fps);
     }
 
     public void setTimeSignature(int num, int den, int meter, int div)
@@ -98,23 +114,6 @@ public class TimeSignature extends MetaEvent
         out.write(mDenominator);
         out.write(mMeter);
         out.write(mDivision);
-    }
-
-    public static MetaEvent parseTimeSignature(long tick, long delta, MetaEventData info)
-    {
-        if(info.length.getValue() != 4)
-        {
-            return new GenericMetaEvent(tick, delta, info);
-        }
-
-        int num = info.data[0];
-        int den = info.data[1];
-        int met = info.data[2];
-        int fps = info.data[3];
-
-        den = (int) Math.pow(2, den);
-
-        return new TimeSignature(tick, delta, num, den, met, fps);
     }
 
     private int log2(int den)
@@ -169,5 +168,10 @@ public class TimeSignature extends MetaEvent
             return mDenominator < o.mDenominator ? -1 : 1;
         }
         return 0;
+    }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
     }
 }

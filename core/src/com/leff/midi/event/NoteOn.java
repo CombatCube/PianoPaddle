@@ -16,6 +16,8 @@
 
 package com.leff.midi.event;
 
+import com.combatcube.pianoshooter.EventVisitor;
+
 public class NoteOn extends ChannelEvent
 {
     public NoteOn(long tick, int channel, int note, int velocity)
@@ -33,18 +35,23 @@ public class NoteOn extends ChannelEvent
         return mValue1;
     }
 
-    public int getVelocity()
-    {
-        return mValue2;
-    }
-
     public void setNoteValue(int p)
     {
         mValue1 = p;
     }
 
+    public int getVelocity()
+    {
+        return mValue2;
+    }
+
     public void setVelocity(int v)
     {
         mValue2 = v;
+    }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
     }
 }

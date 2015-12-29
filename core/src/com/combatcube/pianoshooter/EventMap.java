@@ -5,73 +5,71 @@ import com.leff.midi.MidiTrack;
 import com.leff.midi.event.MidiEvent;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
-import com.leff.midi.event.meta.KeySignature;
-import com.leff.midi.event.meta.Tempo;
 
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * Class to hold time-based events.
  * Created by andrew on 12/25/2015.
  */
 public class EventMap {
-    public Array<Event> events;
+    public Array<MidiEvent> events;
     public Array<Note> trackNotes;
     public int minNote;
     public int maxNote;
 
     public EventMap() {
-        events = new Array<Event>();
+        events = new Array<MidiEvent>();
         trackNotes = new Array<Note>();
         minNote = Integer.MAX_VALUE;
         maxNote = Integer.MIN_VALUE;
     }
 
     public void addTrackEvents(MidiTrack track, boolean addNotes) {
+        HashMap<Integer, LinkedList<NoteOn>> noteOns = new HashMap<Integer, LinkedList<NoteOn>>();
         if (track != null) {
-            Iterator<MidiEvent> it = track.getEvents().iterator();
-            HashMap<Integer, NoteOn> noteOns = new HashMap<Integer, NoteOn>();
-            while(it.hasNext()) {
-                MidiEvent event = it.next();
-                if (event instanceof Tempo) {
-                    Tempo tempo = (Tempo) event;
-                    events.add(new TempoChange(tempo.getTick(), tempo.getBpm()));
-                }
-                if (event instanceof KeySignature) {
-                    KeySignature keySig = (KeySignature) event;
-                    events.add(new KeyChange(keySig.getTick(),
-                            new Key(PitchClass.C.successor(keySig.getKey()))));
-                }
-                if (event instanceof NoteOn) {
-                    NoteOn noteOn = (NoteOn) event;
-                    minNote = Math.min(minNote, noteOn.getNoteValue());
-                    maxNote = Math.max(maxNote, noteOn.getNoteValue());
-                    if (noteOn.getVelocity() != 0) {
-                        noteOns.put(noteOn.getNoteValue(), noteOn);
-                    } else {
-                        event = new NoteOff(noteOn.getTick(), noteOn.getChannel(), noteOn.getNoteValue(), noteOn.getVelocity());
-                    }
-                }
-                if (event instanceof NoteOff) {
-                    NoteOff noteOff = (NoteOff) event;
-                    int noteValue = noteOff.getNoteValue();
-                    if (noteOns.get(noteValue) != null) {
-                        NoteOn noteOn = noteOns.remove(noteValue);
-                        Note note = new Note(
-                                noteValue,
-                                noteOn.getTick(),
-                                noteOff.getTick() - noteOn.getTick(),
-                                noteOn.getVelocity());
-                        events.add(note);
-                        if (addNotes) {
-                            trackNotes.add(note);
-                        }
-                    }
+            for (MidiEvent event : track.getEvents()) {
+                events.add(event);
+                if (addNotes) {
+                    processNoteEvent(noteOns, event);
                 }
             }
         }
         events.sort();
         trackNotes.sort();
+    }
+
+    private void processNoteEvent(HashMap<Integer, LinkedList<NoteOn>> noteOns, MidiEvent event) {
+        if (event instanceof NoteOn) {
+            NoteOn noteOn = (NoteOn) event;
+            minNote = Math.min(minNote, noteOn.getNoteValue());
+            maxNote = Math.max(maxNote, noteOn.getNoteValue());
+            int noteValue = noteOn.getNoteValue();
+            if (noteOn.getVelocity() != 0) {
+                LinkedList<NoteOn> list = noteOns.get(noteValue);
+                if (list == null) {
+                    list = new LinkedList<NoteOn>();
+                }
+                list.add(noteOn);
+                noteOns.put(noteValue, list);
+            } else if (noteOns.get(noteValue) != null) {
+                NoteOn noteOn1 = noteOns.get(noteValue).removeFirst();
+                makeNote(noteOn1, noteOn.getTick() - noteOn1.getTick());
+            }
+        }
+        if (event instanceof NoteOff) {
+            NoteOff noteOff = (NoteOff) event;
+            int noteValue = noteOff.getNoteValue();
+            if (noteOns.get(noteValue) != null) {
+                NoteOn noteOn = noteOns.get(noteValue).removeFirst();
+                makeNote(noteOn, noteOff.getTick() - noteOn.getTick());
+            }
+        }
+    }
+
+    private void makeNote(NoteOn noteOn, long duration) {
+        Note note = new Note(noteOn, duration);
+        trackNotes.add(note);
     }
 }

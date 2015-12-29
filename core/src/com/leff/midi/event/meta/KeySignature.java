@@ -16,11 +16,12 @@
 
 package com.leff.midi.event.meta;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
+import com.combatcube.pianoshooter.EventVisitor;
 import com.leff.midi.event.MidiEvent;
 import com.leff.midi.util.VariableLengthInt;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class KeySignature extends MetaEvent
 {
@@ -38,6 +39,21 @@ public class KeySignature extends MetaEvent
         mScale = scale;
     }
 
+    public static MetaEvent parseKeySignature(long tick, long delta, MetaEventData info) {
+        if (info.length.getValue() != 2) {
+            return new GenericMetaEvent(tick, delta, info);
+        }
+
+        int key = info.data[0];
+        int scale = info.data[1];
+
+        return new KeySignature(tick, delta, key, scale);
+    }
+
+    public int getKey() {
+        return mKey;
+    }
+
     public void setKey(int key)
     {
         mKey = (byte) key;
@@ -48,19 +64,14 @@ public class KeySignature extends MetaEvent
             mKey = 7;
     }
 
-    public int getKey()
+    public int getScale()
     {
-        return mKey;
+        return mScale;
     }
 
     public void setScale(int scale)
     {
         mScale = scale;
-    }
-
-    public int getScale()
-    {
-        return mScale;
     }
 
     @Override
@@ -77,19 +88,6 @@ public class KeySignature extends MetaEvent
         out.write(2);
         out.write(mKey);
         out.write(mScale);
-    }
-
-    public static MetaEvent parseKeySignature(long tick, long delta, MetaEventData info)
-    {
-        if(info.length.getValue() != 2)
-        {
-            return new GenericMetaEvent(tick, delta, info);
-        }
-
-        int key = info.data[0];
-        int scale = info.data[1];
-
-        return new KeySignature(tick, delta, key, scale);
     }
 
     @Override
@@ -121,5 +119,10 @@ public class KeySignature extends MetaEvent
         }
 
         return 0;
+    }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
     }
 }
