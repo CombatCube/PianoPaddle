@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -22,6 +23,7 @@ public class PianoShooter extends Game {
     private OrthographicCamera camera;
     private SpriteBatch batch;
     private ShapeRenderer renderer;
+    private BitmapFont font;
     private NinePatch notePatch;
 
     private float diatonicWidth;
@@ -36,7 +38,7 @@ public class PianoShooter extends Game {
     public void create () {
         soundEngine = new SoundEngine(csoundAdapter);
         notePatch = new TextureAtlas("textures.pack").createPatch("notepatch");
-        eventMap = soundEngine.getMainEventMap();
+        eventMap = soundEngine.getEventMap();
         range = eventMap.maxNote - eventMap.minNote;
         chromaticWidth = 1600 / (float) (range + 1);
         diatonicWidth = chromaticWidth * 12 / (float) 7;
@@ -44,6 +46,7 @@ public class PianoShooter extends Game {
         camera.setToOrtho(false, 1600, 900);
         batch = new SpriteBatch();
         renderer = new ShapeRenderer();
+        font = new BitmapFont();
         shooterWidth = diatonicWidth * 10;
         primaryShooter = new Shooter(new Rectangle(0, 25, shooterWidth, 20));
         soundEngine.startPlaying();
@@ -56,7 +59,6 @@ public class PianoShooter extends Game {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setProjectionMatrix(camera.combined);
         renderer.setProjectionMatrix(camera.combined);
-
         // Move camera and shooters according to input
         boolean nonDiatonic;
         if (!Gdx.input.isPeripheralAvailable(Input.Peripheral.MultitouchScreen)) {
@@ -87,20 +89,19 @@ public class PianoShooter extends Game {
 
         // Draw notes
         batch.begin();
-        for (Note note : eventMap.noteEvents) {
+        for (Note note : eventMap.trackNotes) {
             notePatch.setColor(getNoteColor(note));
             int scaleDegree = soundEngine.getKey().pitchToScaleDegree(note.pitch);
             note.diatonic = (scaleDegree != -1);
-            float x = noteX(note.pitch, scaleDegree);
+            float x = noteX(note.pitch);
             float width = note.diatonic ? diatonicWidth : chromaticWidth;
             float y = (float) (note.tick - soundEngine.getCurrentTick());
             float height = note.duration;
             notePatch.draw(batch, x, y, width, height);
             // Do collision
-            if (!note.missed && !note.played && note.tick <= soundEngine.getCurrentTick()) {
+            if (!note.missed && !note.played && note.tick - 40 <= soundEngine.getCurrentTick()) {
                 if (primaryShooter.contains(x, width)) {
                     if (note.diatonic || nonDiatonic) {
-                        csoundAdapter.playNote(11, soundEngine.ticksToSeconds(note.duration), note.pitch, note.velocity);
                         note.played = true;
                     } else {
                         note.missed = true;
@@ -111,8 +112,9 @@ public class PianoShooter extends Game {
             }
         }
         drawPiano();
+        font.setColor(Color.YELLOW);
+        font.draw(batch, soundEngine.getKey().pitchClass.toString(), 50, 125);
         batch.end();
-
         // Draw paddle
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.setColor(nonDiatonic ? Color.NAVY : Color.FOREST);
@@ -126,76 +128,64 @@ public class PianoShooter extends Game {
     }
 
     private void drawPiano() {
-        int j = 0;
-        for (int i = 0; i < range; i++) {
+        // White (lower) keys
+        for (int i = 0; i < range + 1; i++) {
             int pitch = eventMap.minNote + i;
             int scaleDegree = soundEngine.getKey().pitchToScaleDegree(pitch);
             if (!Key.isBlackKey(pitch)) {
-                notePatch.setColor(scaleDegree != -1 ? Color.GREEN : Color.WHITE);
-                notePatch.draw(batch, j * diatonicWidth, -200f, diatonicWidth, 200f);
-                j++;
+                notePatch.setColor(soundEngine.getKey().pitchToScaleDegree(pitch) != -1 ? Color.WHITE : Color.DARK_GRAY);
+                notePatch.draw(batch, noteX(pitch), -150f, diatonicWidth, 150f);
             }
         }
-        for (int i = 0; i < range; i++) {
+        // Black (upper) keys
+        for (int i = 0; i < range + 1; i++) {
             int pitch = eventMap.minNote + i;
             int scaleDegree = soundEngine.getKey().pitchToScaleDegree(pitch);
             if (Key.isBlackKey(pitch)) {
-                notePatch.setColor(scaleDegree != -1 ? Color.FOREST : Color.BLACK);
-                notePatch.draw(batch, i * chromaticWidth - 0.5f * chromaticWidth, -100f, chromaticWidth * 1.33f, 100);
+                notePatch.setColor(soundEngine.getKey().pitchToScaleDegree(pitch) != -1 ? Color.LIGHT_GRAY : Color.BLACK);
+                notePatch.draw(batch, noteX(pitch), -100f, chromaticWidth, 100);
             }
         }
     }
 
     private Color getNoteColor(Note note) {
         if (note.tick > soundEngine.getCurrentTick()) {
-            if (soundEngine.getKey().pitchToScaleDegree(note.pitch) == -1) {
-                if (Key.isBlackKey(note.pitch)) {
-                    return Color.NAVY;
-                } else {
-                    return Color.BLUE;
-                }
+            if (soundEngine.getKey().pitchToScaleDegree(note.pitch) != -1) {
+                return Color.WHITE;
             } else {
-                if (Key.isBlackKey(note.pitch)) {
-                    return Color.FOREST;
-                } else {
-                    return Color.GREEN;
-                }
+                return Color.BLACK;
             }
         } else {
             if (!note.missed) {
-                if (!Key.isBlackKey(note.pitch)) {
-                    return Color.WHITE;
-                } else {
-                    return Color.BLACK;
-                }
+                return Color.FOREST;
             } else {
                 return Color.RED;
             }
         }
     }
 
-    private float noteX(int pitch, int scaleDegree) {
+    private float noteX(int pitch) {
         float x = (pitch - eventMap.minNote) * chromaticWidth;
-        switch (scaleDegree) {
+        switch (pitch % 12) {
             case 0: // Do
                 x -= chromaticWidth * 0 / (float) 7;
                 break;
-            case 1: // Re
+            case 2: // Re
                 x -= chromaticWidth * 2 / (float) 7;
                 break;
-            case 2: // Mi
+            case 4: // Mi
                 x -= chromaticWidth * 4 / (float) 7;
                 break;
-            case 3: // Fa
+            case 5: // Fa
                 x += chromaticWidth * 1 / (float) 7;
                 break;
-            case 4: // So
+            case 7: // So
                 x -= chromaticWidth * 1 / (float) 7;
                 break;
-            case 5: // La
+            case 9: // La
                 x -= chromaticWidth * 3 / (float) 7;
                 break;
-            case 6: // Ti
+            case 11: // Ti
                 x -= chromaticWidth * 5 / (float) 7;
                 break;
             default: // Non-diatonic

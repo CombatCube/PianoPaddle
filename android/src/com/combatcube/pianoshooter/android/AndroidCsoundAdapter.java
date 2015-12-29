@@ -51,8 +51,8 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
     @Override
     public void load() {
         csoundObj.getCsound().SetOption("-odac");
-//        csoundObj.getCsound().SetOption("-B512");
-//        csoundObj.getCsound().SetOption("-B4096");
+        csoundObj.getCsound().SetOption("-b256");
+        csoundObj.getCsound().SetOption("-B2048");
         csoundObj.getCsound().SetOption("-+rtmidi=null");
         csoundObj.getCsound().SetOption("-+rtaudio=alsa");
     }

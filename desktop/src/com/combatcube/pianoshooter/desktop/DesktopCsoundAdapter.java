@@ -24,8 +24,8 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
     @Override
     public void load() {
         csound.SetOption("-odac");
-        csound.SetOption("-b512");
-        csound.SetOption("-B4096");
+        csound.SetOption("-b256");
+        csound.SetOption("-B2048");
         csound.CompileOrc(ORCHESTRA);
         score = "i 99 0 360; audio output instrument also keeps performance going\n";
         ampChannel = new CsoundMYFLTArray(1);

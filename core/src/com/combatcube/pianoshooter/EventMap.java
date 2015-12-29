@@ -17,19 +17,18 @@ import java.util.Iterator;
  */
 public class EventMap {
     public Array<Event> events;
-    public Array<Note> noteEvents;
+    public Array<Note> trackNotes;
     public int minNote;
     public int maxNote;
 
     public EventMap() {
         events = new Array<Event>();
-        noteEvents = new Array<Note>();
+        trackNotes = new Array<Note>();
         minNote = Integer.MAX_VALUE;
         maxNote = Integer.MIN_VALUE;
     }
 
-    public EventMap(MidiTrack track) {
-        this();
+    public void addTrackEvents(MidiTrack track, boolean addNotes) {
         if (track != null) {
             Iterator<MidiEvent> it = track.getEvents().iterator();
             HashMap<Integer, NoteOn> noteOns = new HashMap<Integer, NoteOn>();
@@ -65,12 +64,14 @@ public class EventMap {
                                 noteOff.getTick() - noteOn.getTick(),
                                 noteOn.getVelocity());
                         events.add(note);
-                        noteEvents.add(note);
+                        if (addNotes) {
+                            trackNotes.add(note);
+                        }
                     }
                 }
             }
         }
         events.sort();
-        noteEvents.sort();
+        trackNotes.sort();
     }
 }

@@ -24,6 +24,8 @@ public class Note extends Event {
 
     @Override
     public void performEvent(SoundEngine engine) {
-        engine.playNote(this);
+        if (!missed) {
+            engine.playNote(this);
+        }
     }
 }

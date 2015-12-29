@@ -17,22 +17,20 @@ import java.util.List;
 public class SoundEngine extends Thread {
     public static final long MILLIS_PER_S = 1000;
     public static final int SECONDS_PER_MINUTE = 60;
-    public static final int DEFAULT_PPQ = 480;
     public static final int COUNT_IN = 4;
     private CsoundAdapter csoundAdapter;
 
     private Key key = new Key(PitchClass.G_FLAT);
     private int range;
 
-    private float bpm = 140;
+    private float bpm = 120;
     private float tempoScale = 1f;
 
     private long ppq = 480;
     private double currentTick = -COUNT_IN * ppq;
 
     private MidiFile midiFile;
-    private EventMap mainEventMap;
-    private EventMap otherEventMap;
+    private EventMap eventMap;
     private boolean isPlaying;
 
     public SoundEngine(CsoundAdapter csoundAdapter) {
@@ -44,6 +42,7 @@ public class SoundEngine extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        midiFile.getResolution();
         readNotes();
     }
 
@@ -71,10 +70,13 @@ public class SoundEngine extends Thread {
     }
 
     private void readNotes() {
+        eventMap = new EventMap();
         MidiTrack mainTrack = SoundEngine.getTrack(midiFile, 0);
-        MidiTrack otherTrack = SoundEngine.getTrack(midiFile, 1);
-        mainEventMap = new EventMap(mainTrack);
-        otherEventMap = new EventMap(otherTrack);
+        eventMap.addTrackEvents(mainTrack, true);
+        for (int i = 1; i < midiFile.getTrackCount(); i++) {
+            MidiTrack otherTrack = SoundEngine.getTrack(midiFile, 1);
+            eventMap.addTrackEvents(otherTrack, false);
+        }
     }
 
     public void startPlaying() {
@@ -92,7 +94,7 @@ public class SoundEngine extends Thread {
         isPlaying = true;
         csoundAdapter.start();
         long prevTime = TimeUtils.millis();
-        Iterator<Event> it = otherEventMap.events.iterator();
+        Iterator<Event> it = eventMap.events.iterator();
         Event nextEvent = it.next(); //assumes first note exists
         while (isPlaying) {
             long newTime = TimeUtils.millis();
@@ -146,8 +148,8 @@ public class SoundEngine extends Thread {
         csoundAdapter.playNote(12, ticksToSeconds(note.duration), note.pitch, note.velocity);
     }
 
-    public EventMap getMainEventMap() {
-        return mainEventMap;
+    public EventMap getEventMap() {
+        return eventMap;
     }
 
     public Key getKey() {
