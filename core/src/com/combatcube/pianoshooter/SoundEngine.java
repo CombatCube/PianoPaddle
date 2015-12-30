@@ -17,7 +17,7 @@ import java.util.List;
 public class SoundEngine extends Thread {
     public static final long MILLIS_PER_S = 1000;
     public static final int SECONDS_PER_MINUTE = 60;
-    public static final int COUNT_IN = 1;
+    public static final int COUNT_IN = 4;
     private CsoundAdapter csoundAdapter;
 
     private Key key = new Key(PitchClass.C);
@@ -34,7 +34,7 @@ public class SoundEngine extends Thread {
         this.csoundAdapter = csoundAdapter;
         csoundAdapter.init();
         try {
-            midiFile = CsoundAdapter.loadMidi("sans.mid");
+            midiFile = CsoundAdapter.loadMidi("Death_by_Glamour.mid");
         } catch (IOException e) {
             e.printStackTrace();
         }
