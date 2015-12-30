@@ -11,6 +11,8 @@ import com.leff.midi.event.meta.TimeSignature;
  * Created by andrew on 12/29/2015.
  */
 public interface EventVisitor {
+    void visit(Note note);
+
     void visit(NoteOn noteOn);
 
     void visit(NoteOff noteOff);

@@ -23,4 +23,9 @@ public class Note extends NoteOn {
         this.touched = false;
         this.missed = false;
     }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
+    }
 }

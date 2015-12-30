@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -31,6 +32,7 @@ public class PianoShooter extends Game {
     private ShapeRenderer renderer;
     private BitmapFont font;
     private NinePatch notePatch;
+    private TextureRegion bowRegion;
     //    private Color diatonicColor = new Color(0.0f, 0.75f, 0.0f, 0.25f);
     private Color diatonicColor = new Color(1f, 1f, 1f, 0.75f);
     private Color chromaticColor = new Color(1f, 1f, 0f, 0.75f);
@@ -50,7 +52,9 @@ public class PianoShooter extends Game {
     @Override
     public void create () {
         soundEngine = new SoundEngine(csoundAdapter);
-        notePatch = new TextureAtlas("textures.pack").createPatch("notepatch");
+        TextureAtlas textureAtlas = new TextureAtlas("textures.pack");
+        notePatch = textureAtlas.createPatch("notepatch");
+        bowRegion = textureAtlas.findRegion("bow");
         eventMap = soundEngine.getEventMap();
         range = eventMap.maxNote - eventMap.minNote;
         chromaticWidth = SCREEN_WIDTH / (float) (range + 1);
@@ -62,7 +66,7 @@ public class PianoShooter extends Game {
         font = new BitmapFont();
         shooterWidth = diatonicWidth * 10;
         shooters = new Array<Shooter>();
-        shooters.add(new Shooter(new Rectangle(0, 0, shooterWidth, 100)));
+        shooters.add(new Shooter(new Rectangle(0, 0, shooterWidth, 30)));
 //        shooters.add(new Shooter(new Rectangle(SCREEN_WIDTH-shooterWidth, 0, shooterWidth, 100)));
         soundEngine.startPlaying();
     }
@@ -127,7 +131,6 @@ public class PianoShooter extends Game {
                 if (!note.touched && !note.passed) {
                     // "Missed" the note at first chance (EARLY_TIME) - do not let engine play
                     note.passed = true;
-                    note.setVelocity(0);
                 }
             }
             if (!note.touched
@@ -138,6 +141,10 @@ public class PianoShooter extends Game {
         font.setColor(Color.YELLOW);
         font.draw(batch, soundEngine.getKey().pitchClass.toString(), 50, 125);
         font.draw(batch, "Score: " + score, 1500, 125);
+//        batch.draw(bowRegion, shooters.get(0).getRect().x - 10,
+//                    10,
+//                    shooters.get(0).getRect().width,
+//                    shooters.get(0).getRect().height);
         batch.end();
         // Draw paddle
         Gdx.gl.glEnable(GL20.GL_BLEND);

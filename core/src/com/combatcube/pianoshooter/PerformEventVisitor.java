@@ -17,6 +17,13 @@ public class PerformEventVisitor implements EventVisitor {
         this.engine = engine;
     }
 
+    @Override
+    public void visit(Note note) {
+        if (!note.passed) {
+            engine.playNote(note);
+        }
+    }
+
     public void visit(NoteOn noteOn) {
         engine.playNote(noteOn);
     }

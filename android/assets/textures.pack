@@ -3,23 +3,30 @@ textures.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-rect
+shooter
   rotate: false
-  xy: 1, 35
+  xy: 1, 13
   size: 200, 200
   orig: 200, 200
   offset: 0, 0
   index: -1
-note
+bow
   rotate: false
   xy: 1, 1
+  size: 167, 10
+  orig: 167, 10
+  offset: 0, 0
+  index: -1
+note
+  rotate: false
+  xy: 203, 181
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 notepatch
   rotate: false
-  xy: 1, 1
+  xy: 203, 181
   size: 32, 32
   split: 12, 12, 12, 12
   orig: 32, 32
