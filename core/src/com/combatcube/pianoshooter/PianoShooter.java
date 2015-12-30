@@ -15,6 +15,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 public class PianoShooter extends Game {
+    private static final int EARLY_TIME = 50;
+    private static final int LATE_TIME = 100;
     private CsoundAdapter csoundAdapter;
     private SoundEngine soundEngine;
     private EventMap eventMap;
@@ -25,14 +27,16 @@ public class PianoShooter extends Game {
     private ShapeRenderer renderer;
     private BitmapFont font;
     private NinePatch notePatch;
-    private Color diatonicColor = new Color(0.0f, 0.75f, 0.0f, 0.25f);
-    private Color chromaticColor = new Color(0.0f, 0.0f, 0.75f, 0.25f);
+    //    private Color diatonicColor = new Color(0.0f, 0.75f, 0.0f, 0.25f);
+    private Color diatonicColor = new Color(1f, 1f, 1f, 0.75f);
+    private Color chromaticColor = new Color(1f, 1f, 0f, 0.75f);
 
     private float diatonicWidth;
     private float chromaticWidth;
     private Shooter primaryShooter;
     private float shooterWidth;
     private int score;
+    private float noteScale = 0.75f;
 
     public PianoShooter(CsoundAdapter csoundAdapter) {
         this.csoundAdapter = csoundAdapter;
@@ -52,14 +56,14 @@ public class PianoShooter extends Game {
         renderer = new ShapeRenderer();
         font = new BitmapFont();
         shooterWidth = diatonicWidth * 5;
-        primaryShooter = new Shooter(new Rectangle(0, 25, shooterWidth, 900));
+        primaryShooter = new Shooter(new Rectangle(0, 0, shooterWidth, 100));
         soundEngine.startPlaying();
     }
 
 
     @Override
     public void render () {
-        Gdx.gl.glClearColor(0.7f, 0.7f, 0.7f, 1);
+        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.setProjectionMatrix(camera.combined);
         renderer.setProjectionMatrix(camera.combined);
@@ -71,7 +75,7 @@ public class PianoShooter extends Game {
             mousePos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             float mouseCenterX = (mousePos.x) * (1600 / (float) Gdx.graphics.getWidth());
             chromatic = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
-            int width = (int) (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) ? shooterWidth * 2 : shooterWidth);
+            int width = (int) (2 * shooterWidth); // (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) ? shooterWidth * 2 : shooterWidth);
             primaryShooter.setWidth(width);
             primaryShooter.moveCenterX(mouseCenterX);
         } else {
@@ -84,42 +88,49 @@ public class PianoShooter extends Game {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            soundEngine.setKey(new Key(soundEngine.getKey().pitchClass.successor(1)));
+            noteScale += 0.1f;
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            soundEngine.setKey(new Key(soundEngine.getKey().pitchClass.successor(-1)));
+            noteScale -= 0.1f;
         }
-        camera.position.y = primaryShooter.getRect().y + 300;
+        camera.position.y = primaryShooter.getRect().y + 200;
         camera.update();
 
-        // Draw notes
         batch.begin();
+        drawPiano();
+        // Draw notes
+        double currentTick = soundEngine.getCurrentTick();
         for (Note note : eventMap.trackNotes) {
             notePatch.setColor(getNoteColor(note));
-            int scaleDegree = soundEngine.getKey().pitchToScaleDegree(note.pitch);
+            int scaleDegree = soundEngine.getKey().pitchToScaleDegree(note.getNoteValue());
             note.diatonic = (scaleDegree != -1);
-            float x = noteX(note.pitch);
-            float width = note.diatonic ? diatonicWidth : chromaticWidth;
-            float y = (float) (note.onTime - soundEngine.getCurrentTick());
-            float height = note.duration;
+            float x = noteX(note.getNoteValue());
+            float width = Key.isBlackKey(note.getNoteValue()) ? chromaticWidth : chromaticWidth;
+            float y = (float) (note.getTick() - currentTick) * noteScale;
+            float height = note.duration * noteScale;
             notePatch.draw(batch, x, y, width, height);
             // Do collision
-            if (!note.missed && !note.played && note.onTime - 40 <= soundEngine.getCurrentTick()) {
-                if (primaryShooter.contains(x, width)) {
-                    if (note.diatonic || chromatic) {
-                        note.played = true;
-                        score += 50;
-                    } else {
-                        note.missed = true;
-                        note.setVelocity(0);
+            if (!note.touched
+                    && note.getTick() - EARLY_TIME <= currentTick
+                    && currentTick < note.getTick() + LATE_TIME) {
+                if (primaryShooter.contains(x, width)
+                        && (note.diatonic || chromatic)) {
+                    note.touched = true;
+                    if (note.passed) {
+                        soundEngine.playNote(note.getChannel(), note.getNoteValue(), note.originalVelocity);
                     }
-                } else {
-                    note.missed = true;
+                    score += 50;
+                } else if (!note.passed) {
+                    // "Missed" the note at first chance (EARLY_TIME) - do not let engine play
+                    note.passed = true;
                     note.setVelocity(0);
                 }
             }
+            if (!note.touched
+                    && note.getTick() + LATE_TIME < currentTick) {
+                note.missed = true;
+            }
         }
-        drawPiano();
         font.setColor(Color.YELLOW);
         font.draw(batch, soundEngine.getKey().pitchClass.toString(), 50, 125);
         font.draw(batch, "Score: " + score, 1500, 125);
@@ -136,7 +147,22 @@ public class PianoShooter extends Game {
                 primaryShooter.getRect().y,
                 10,
                 primaryShooter.getRect().height);
-        // Draw piano
+        renderer.rect(primaryShooter.getRect().x,
+                primaryShooter.getRect().y,
+                primaryShooter.getRect().getWidth(),
+                10);
+        renderer.setColor(Color.NAVY);
+        renderer.rect(0, 0, 1600, 5);
+
+//        for (Note note : eventMap.trackNotes) {
+//            renderer.setColor(Color.GREEN);
+//            float x = noteX(note.getNoteValue());
+//            float width = chromaticWidth;
+//            float y = (float) (note.getTick()- currentTick) * noteScale;
+//            renderer.rect(x, y - EARLY_TIME * noteScale, width, EARLY_TIME * noteScale);
+//            renderer.setColor(Color.YELLOW);
+//            renderer.rect(x, y, width, LATE_TIME* noteScale);
+//        }
         renderer.end();
     }
 
@@ -144,33 +170,41 @@ public class PianoShooter extends Game {
         // White (lower) keys
         for (int i = 0; i < range + 1; i++) {
             int pitch = eventMap.minNote + i;
-            int scaleDegree = soundEngine.getKey().pitchToScaleDegree(pitch);
             if (!Key.isBlackKey(pitch)) {
-                notePatch.setColor(soundEngine.getKey().pitchToScaleDegree(pitch) != -1 ? Color.WHITE : Color.DARK_GRAY);
-                notePatch.draw(batch, noteX(pitch), -150f, diatonicWidth, 150f);
+                notePatch.setColor(soundEngine.getKey().pitchToScaleDegree(pitch) != -1 ? Color.WHITE : Color.WHITE);
+                notePatch.draw(batch, noteX(pitch), -200f, diatonicWidth, 150f);
             }
         }
         // Black (upper) keys
         for (int i = 0; i < range + 1; i++) {
             int pitch = eventMap.minNote + i;
-            int scaleDegree = soundEngine.getKey().pitchToScaleDegree(pitch);
             if (Key.isBlackKey(pitch)) {
-                notePatch.setColor(soundEngine.getKey().pitchToScaleDegree(pitch) != -1 ? Color.LIGHT_GRAY : Color.BLACK);
-                notePatch.draw(batch, noteX(pitch), -100f, chromaticWidth, 100);
+                notePatch.setColor(soundEngine.getKey().pitchToScaleDegree(pitch) != -1 ? Color.BLACK : Color.BLACK);
+                notePatch.draw(batch, noteX(pitch), -150f, chromaticWidth, 100);
             }
         }
     }
 
     private Color getNoteColor(Note note) {
-        if (note.onTime > soundEngine.getCurrentTick()) {
-            if (soundEngine.getKey().pitchToScaleDegree(note.pitch) != -1) {
-                return Color.WHITE;
+        if (soundEngine.getCurrentTick() - LATE_TIME < note.getTick()) {
+            if (soundEngine.getKey().pitchToScaleDegree(note.getNoteValue()) != -1) {
+                // In-key
+                if (Key.isBlackKey(note.getNoteValue())) {
+                    return Color.WHITE;
+                } else {
+                    return Color.WHITE;
+                }
             } else {
-                return Color.BLACK;
+                // Out of key
+                if (Key.isBlackKey(note.getNoteValue())) {
+                    return Color.YELLOW;
+                } else {
+                    return Color.YELLOW;
+                }
             }
         } else {
-            if (!note.missed) {
-                return Color.FOREST;
+            if (note.touched) {
+                return Color.GREEN;
             } else {
                 return Color.RED;
             }

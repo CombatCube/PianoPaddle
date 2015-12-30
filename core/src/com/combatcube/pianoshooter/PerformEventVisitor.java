@@ -18,12 +18,12 @@ public class PerformEventVisitor implements EventVisitor {
     }
 
     public void visit(NoteOn noteOn) {
-        engine.playNote(noteOn.getChannel() + 11, -1, noteOn.getNoteValue(), noteOn.getVelocity());
+        engine.playNote(noteOn);
     }
 
     @Override
     public void visit(NoteOff noteOff) {
-        engine.playNote(noteOff.getChannel() + 11, -1, noteOff.getNoteValue(), 0);
+        engine.playNote(noteOff);
     }
 
     @Override
