@@ -9,7 +9,7 @@ import com.leff.midi.event.NoteOn;
 public class Note extends NoteOn {
     public long duration;
     public int originalVelocity;
-    public boolean diatonic;
+    public int scaleDegree;
     public boolean passed;
     public boolean touched;
     public boolean missed;
@@ -17,7 +17,7 @@ public class Note extends NoteOn {
     public Note(NoteOn noteOn, long duration) {
         super(noteOn.getTick(), noteOn.getChannel(), noteOn.getNoteValue(), noteOn.getVelocity());
         this.duration = duration;
-        this.diatonic = false;
+        this.scaleDegree = -1;
         this.originalVelocity = noteOn.getVelocity();
         this.passed = false;
         this.touched = false;
