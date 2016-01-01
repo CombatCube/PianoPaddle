@@ -13,6 +13,7 @@ public class Note extends NoteOn {
     public boolean passed;
     public boolean touched;
     public boolean missed;
+    public int interval;
 
     public Note(NoteOn noteOn, long duration) {
         super(noteOn.getTick(), noteOn.getChannel(), noteOn.getNoteValue(), noteOn.getVelocity());
@@ -22,6 +23,7 @@ public class Note extends NoteOn {
         this.passed = false;
         this.touched = false;
         this.missed = false;
+        this.interval = 0;
     }
 
     @Override

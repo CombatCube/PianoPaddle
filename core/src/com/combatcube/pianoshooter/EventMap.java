@@ -8,7 +8,9 @@ import com.leff.midi.event.NoteOn;
 import com.leff.midi.event.meta.KeySignature;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class to hold time-based events.
@@ -85,6 +87,64 @@ public class EventMap {
         }
         events.sort();
         trackNotes.sort();
+    }
+
+    public static void findIntervals(Array<Note> notes) {
+        LinkedList<Note> notesInBeat = new LinkedList<Note>();
+        LinkedList<Note> chord = new LinkedList<Note>();
+        long currentBeat = 0;
+        long chordTick = 0;
+        int minNote = Integer.MAX_VALUE;
+        int maxNote = Integer.MIN_VALUE;
+        int maxInterval = 0;
+        for (Note note : notes) {
+            long tick = note.getTick();
+            // Note is in same chord
+            if (tick <= chordTick + 60) {
+                minNote = Math.min(minNote, note.getNoteValue());
+                maxNote = Math.max(maxNote, note.getNoteValue());
+                maxInterval = Math.max(maxNote - minNote, maxInterval);
+                chordTick = tick;
+            }
+            // Note is in same beat, but not in chord
+            else if (tick < currentBeat + 480) {
+                for (Note noteInChord : chord) {
+                    noteInChord.interval = maxNote - minNote;
+                }
+                minNote = note.getNoteValue();
+                maxNote = note.getNoteValue();
+                chord.clear();
+                chordTick = tick;
+                // Note is not in same beat
+            } else {
+                for (Note noteInChord : chord) {
+                    noteInChord.interval = maxNote - minNote;
+                }
+                for (Note noteInBeat : notesInBeat) {
+                    noteInBeat.interval = maxInterval;
+                }
+                minNote = note.getNoteValue();
+                maxNote = note.getNoteValue();
+                chord.clear();
+                chordTick = tick;
+                maxInterval = 0;
+                notesInBeat.clear();
+                currentBeat = (tick / 480) * 480;
+            }
+            chord.add(note);
+            notesInBeat.add(note);
+        }
+        for (Note noteInChord : chord) {
+            noteInChord.interval = maxNote - minNote;
+        }
+        for (Note noteInBeat : notesInBeat) {
+            noteInBeat.interval = maxInterval;
+        }
+    }
+
+    private class Beat {
+        private LinkedList<Note> notes;
+        private int maxInterval;
     }
 
 }

@@ -34,7 +34,7 @@ public class SoundEngine extends Thread {
         this.csoundAdapter = csoundAdapter;
         csoundAdapter.init();
         try {
-            midiFile = CsoundAdapter.loadMidi("Death_by_Glamour.mid");
+            midiFile = CsoundAdapter.loadMidi("Spider_Dance.mid");
         } catch (IOException e) {
             e.printStackTrace();
         }

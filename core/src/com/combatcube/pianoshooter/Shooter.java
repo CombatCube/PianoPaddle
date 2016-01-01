@@ -1,34 +1,42 @@
 package com.combatcube.pianoshooter;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Shooter {
     private Rectangle rect;
     private float noteWidth;
+    private int intervalStart = 0;
+    private int intervalEnd = 0;
+    private Color color;
 
-    public Shooter(Rectangle rect, float noteWidth) {
-        this.rect = rect;
+    public Shooter(int intervalStart, int intervalEnd, float noteWidth, Color color) {
+        this.rect = new Rectangle(0, 0, intervalEnd * (noteWidth + 2), 10);
+        this.intervalStart = intervalStart;
+        this.intervalEnd = intervalEnd;
         this.noteWidth = noteWidth;
-    }
-
-    public Rectangle getRect() {
-        return rect;
-    }
-
-    public void setWidth(int width) {
-        rect.width = width;
+        this.color = color;
     }
 
     public boolean contains(float x, float width) {
-        return x < getRect().getX() + getRect().getWidth()
-                && x + width > getRect().getX();
+        return x < rect.getX() + rect.getWidth()
+                && x + width > rect.getX();
     }
 
     public boolean contains(Note note) {
-        return contains(note.getNoteValue() * noteWidth, noteWidth);
+        return note.interval >= intervalStart && contains(note.getNoteValue() * noteWidth, noteWidth);
     }
 
     public void moveCenterX(float pos) {
-        rect.setX(pos - getRect().getWidth() / 2);
+        rect.setX(pos - rect.getWidth() / 2);
+    }
+
+    public void draw(ShapeRenderer renderer) {
+        renderer.setColor(color);
+        renderer.rect(rect.getX(),
+                rect.getY(),
+                rect.getWidth(),
+                rect.getHeight());
     }
 }
