@@ -32,14 +32,6 @@ public class SoundEngine extends Thread {
     public SoundEngine(CsoundAdapter csoundAdapter) {
         isPlaying = false;
         this.csoundAdapter = csoundAdapter;
-        csoundAdapter.init();
-        try {
-            midiFile = CsoundAdapter.loadMidi("Spider_Dance.mid");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        midiFile.getResolution();
-        readNotes();
     }
 
     public static MidiTrack getTrack(MidiFile midiFile, int trackNo) {
@@ -88,9 +80,16 @@ public class SoundEngine extends Thread {
         }
     }
 
-    public void startPlaying() {
+    public void init(String filename) {
+        csoundAdapter.init();
+        try {
+            midiFile = CsoundAdapter.loadMidi(filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        midiFile.getResolution();
+        readNotes();
         csoundAdapter.load();
-        this.start();
     }
 
     public double getCurrentTick() {

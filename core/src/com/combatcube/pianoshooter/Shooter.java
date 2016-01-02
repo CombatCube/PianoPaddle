@@ -11,8 +11,8 @@ public class Shooter {
     private int intervalEnd = 0;
     private Color color;
 
-    public Shooter(int intervalStart, int intervalEnd, float noteWidth, Color color) {
-        this.rect = new Rectangle(0, 0, intervalEnd * (noteWidth + 2), 10);
+    public Shooter(int intervalStart, int intervalEnd, float noteWidth, float noteHeight, Color color) {
+        this.rect = new Rectangle(0, -noteHeight, (intervalEnd + 2) * (noteWidth), noteHeight);
         this.intervalStart = intervalStart;
         this.intervalEnd = intervalEnd;
         this.noteWidth = noteWidth;
