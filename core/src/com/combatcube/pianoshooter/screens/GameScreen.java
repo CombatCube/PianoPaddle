@@ -63,7 +63,7 @@ public class GameScreen implements Screen {
         drawVisitor.screenWidth = SCREEN_WIDTH;
         drawVisitor.range = range;
         shooters = new Array<Shooter>();
-        shooters.add(new Shooter(11, 15, chromaticWidth, 40, Color.PURPLE));
+        shooters.add(new Shooter(11, 15, chromaticWidth, 40, Color.PINK));
         shooters.add(new Shooter(7, 10, chromaticWidth, 30, Color.ORANGE));
         shooters.add(new Shooter(3, 6, chromaticWidth, 20, Color.GREEN));
         shooters.add(new Shooter(0, 2, chromaticWidth, 10, Color.BLUE));
@@ -231,7 +231,7 @@ public class GameScreen implements Screen {
 //                notePatch.setColor(soundEngine.getKey().pitchToScaleDegree(pitch) != -1 ? Color.WHITE : Color.WHITE);
 //                notePatch.draw(batch, notePianoX(pitch), -200f, diatonicWidth, 150f);
                 game.renderer.setColor(Color.WHITE);
-                game.renderer.rect(notePianoX(i), -200f, diatonicWidth - 1, 150f);
+                game.renderer.rect(notePianoX(i), -200f, diatonicWidth, 150f);
             }
         }
         // Black (upper) keys
@@ -275,12 +275,4 @@ public class GameScreen implements Screen {
         return x;
     }
 
-    private void promptFile() {
-        File file = Gdx.files.local("").file();
-        MidiFilenameFilter filter = new MidiFilenameFilter();
-        String[] fileNames = file.list(filter);
-        for(String fileName : fileNames) {
-
-        }
-    }
 }

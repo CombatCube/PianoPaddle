@@ -35,7 +35,7 @@ public class DrawEventVisitor implements EventVisitor {
                 } else if (note.interval < 11) {
                     return Color.ORANGE;
                 } else if (note.interval < 15) {
-                    return Color.PURPLE;
+                    return Color.PINK;
                 } else {
                     return Color.BLACK;
                 }
@@ -60,7 +60,7 @@ public class DrawEventVisitor implements EventVisitor {
         float y = (float) (note.getTick() - currentTick) * noteScale;
         float height = note.duration * noteScale;
         renderer.rect(x, y, width, 40);
-        renderer.rect(x+width/2, y, 1, height);
+        renderer.rect(x+width/2 -3, y, 5, height);
     }
 
     @Override
