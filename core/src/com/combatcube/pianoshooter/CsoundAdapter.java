@@ -56,7 +56,7 @@ public abstract class CsoundAdapter {
     protected double amp = 1.0;
 
     public static MidiFile loadMidi(String fileName) throws IOException {
-        Gdx.files.internal(fileName).copyTo(Gdx.files.local("tmp/tmp.mid"));
+        Gdx.files.internal("midi/" + fileName).copyTo(Gdx.files.local("tmp/tmp.mid"));
         return new MidiFile(Gdx.files.local("tmp/tmp.mid").file());
     }
 

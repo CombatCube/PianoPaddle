@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.math.Vector3;
 import com.combatcube.pianoshooter.MidiFilenameFilter;
 import com.combatcube.pianoshooter.PianoShooter;
 
@@ -16,14 +17,16 @@ import java.io.File;
  */
 public class FileSelectScreen implements Screen {
     private PianoShooter game;
-    private String[] fileNames;
+    private FileHandle[] fileNames;
     private int selectedFile = 0;
+    private boolean justTouched;
 
     public FileSelectScreen(PianoShooter game) {
         this.game = game;
-        File file = Gdx.files.local("").file();
+        FileHandle file = Gdx.files.internal("midi");
         MidiFilenameFilter filter = new MidiFilenameFilter();
         fileNames = file.list(filter);
+        justTouched = true;
     }
 
     @Override
@@ -33,33 +36,58 @@ public class FileSelectScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            if (selectedFile < fileNames.length - 1) {
-                selectedFile += 1;
-            }
+            changeFile(-1);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            if (selectedFile > 0) {
-                selectedFile -= 1;
-            }
+            changeFile(1);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            game.setScreen(new GameScreen(game, fileNames[selectedFile]));
-            dispose();
+            startGame();
+        }
+        if (Gdx.input.isTouched()) {
+            if (!justTouched) {
+                justTouched = true;
+                Vector3 mousePos = new Vector3();
+                mousePos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+                if (0 < mousePos.y && mousePos.y < Gdx.graphics.getHeight()/3) {
+                    changeFile(-1);
+                }
+                if (Gdx.graphics.getHeight()/3 < mousePos.y && mousePos.y < 2*Gdx.graphics.getHeight()/3) {
+                    startGame();
+                }
+                if (2*Gdx.graphics.getHeight()/3 < mousePos.y && mousePos.y < Gdx.graphics.getHeight()) {
+                    changeFile(1);
+                }
+            }
+        } else {
+            justTouched = false;
         }
         game.batch.begin();
         for (int i = 0; i < fileNames.length; i++) {
-            String fileName = fileNames[i];
+            FileHandle fileName = fileNames[i];
             if (i == selectedFile) {
                 game.font.setColor(Color.YELLOW);
             } else {
                 game.font.setColor(Color.WHITE);
             }
-            game.font.draw(game.batch, fileName, 200, 100*(i-selectedFile) + 400);
+            game.font.draw(game.batch, fileName.name(), 200, 100*(selectedFile-i) + 400);
         }
         game.batch.end();
+    }
+
+    private void startGame() {
+        game.setScreen(new GameScreen(game, fileNames[selectedFile].name()));
+        dispose();
+    }
+
+    private void changeFile(int increment) {
+        if (0 < selectedFile + increment
+                && selectedFile + increment < fileNames.length - 1) {
+            selectedFile += increment;
+        }
     }
 
     @Override

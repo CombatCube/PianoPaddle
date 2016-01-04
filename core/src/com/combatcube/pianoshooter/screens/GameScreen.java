@@ -76,7 +76,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render (float delta) {
-        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         game.batch.setProjectionMatrix(camera.combined);
         game.renderer.setProjectionMatrix(camera.combined);
@@ -208,7 +208,10 @@ public class GameScreen implements Screen {
         Vector3 touch0Pos = new Vector3();
         touch0Pos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
         chromatic = Gdx.input.isTouched(1);
-        shooters.get(0).moveCenterX((touch0Pos.x) * (SCREEN_WIDTH / (float) Gdx.graphics.getWidth()));
+        for (Shooter shooter : shooters) {
+            shooter.moveCenterX(
+                    (touch0Pos.x) * (camera.viewportWidth / (float) Gdx.graphics.getWidth()) + camera.position.x - camera.viewportWidth / 2);
+        }
     }
 
     private void doMouseInput() {

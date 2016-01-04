@@ -60,7 +60,7 @@ public class DrawEventVisitor implements EventVisitor {
         float y = (float) (note.getTick() - currentTick) * noteScale;
         float height = note.duration * noteScale;
         renderer.rect(x, y, width, 40);
-        renderer.rect(x+width/2 -3, y, 5, height);
+//        renderer.rect(x+width/2 -3, y, 5, height);
     }
 
     @Override

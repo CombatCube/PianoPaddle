@@ -28,7 +28,6 @@ public class PianoShooter extends Game {
         this.batch = new SpriteBatch();
         this.renderer = new ShapeRenderer();
         this.font = new BitmapFont(Gdx.files.internal("geo72.fnt"));
-//        this.screen = new GameScreen(this, "Death_by_Glamour.mid");
         this.screen = new MainMenuScreen(this);
     }
 
