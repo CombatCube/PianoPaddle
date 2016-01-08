@@ -48,4 +48,9 @@ public class PerformEventVisitor implements EventVisitor {
         engine.setBpm(tempo.getBpm());
     }
 
+    @Override
+    public void visit(Chord chord) {
+
+    }
+
 }

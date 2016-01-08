@@ -17,8 +17,8 @@ public abstract class CsoundAdapter {
             "\n" +
             "giEngine1     fluidEngine                                            ; start fluidsynth engine\n" +
             "giEngine2     fluidEngine                                            ; start fluidsynth engine\n" +
-            "iSfNum1      fluidLoad          \"synthgms.sf2\", giEngine1, 1         ; load a soundfont\n" +
-            "iSfNum2      fluidLoad          \"synthgms.sf2\", giEngine2, 1         ; load a soundfont\n" +
+            "iSfNum1      fluidLoad          \"TimGM6mb.sf2\", giEngine1, 1         ; load a soundfont\n" +
+            "iSfNum2      fluidLoad          \"TimGM6mb.sf2\", giEngine2, 1         ; load a soundfont\n" +
             "             fluidProgramSelect giEngine1, 1, iSfNum1, 0, 1         ; direct each midi channel to a particular soundfont\n" +
             "             fluidProgramSelect giEngine2, 2, iSfNum2, 0, 1\n" +
             "\n" +
@@ -62,8 +62,8 @@ public abstract class CsoundAdapter {
 
     public void init() {
         Gdx.files.internal("playmidi.csd").copyTo(Gdx.files.local("tmp/playmidi.csd"));
-        if (!Gdx.files.local("tmp/synthgms.sf2").exists()) {
-            Gdx.files.internal("synthgms.sf2").copyTo(Gdx.files.local("tmp/synthgms.sf2"));
+        if (!Gdx.files.local("tmp/TimGM6mb.sf2").exists()) {
+            Gdx.files.internal("TimGM6mb.sf2").copyTo(Gdx.files.local("tmp/TimGM6mb.sf2"));
         }
     }
 
@@ -78,4 +78,6 @@ public abstract class CsoundAdapter {
     }
 
     public abstract void readScore();
+
+    public abstract void stop();
 }

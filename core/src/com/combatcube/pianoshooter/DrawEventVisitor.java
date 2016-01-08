@@ -18,6 +18,7 @@ public class DrawEventVisitor implements EventVisitor {
     public int range = 0;
     public int screenWidth;
     private ShapeRenderer renderer;
+    private float width = 40;
 
     public DrawEventVisitor(ShapeRenderer renderer) {
         this.renderer = renderer;
@@ -55,12 +56,21 @@ public class DrawEventVisitor implements EventVisitor {
     @Override
     public void visit(Note note) {
         renderer.setColor(getNoteColor(note));
-        float width = 40;
         float x = (note.getNoteValue()) * width;
         float y = (float) (note.getTick() - currentTick) * noteScale;
-        float height = note.duration * noteScale;
-        renderer.rect(x, y, width, 40);
+//        float height = note.duration * noteScale;
+        float height = 40;
+        renderer.rect(x, y, width, height);
 //        renderer.rect(x+width/2 -3, y, 5, height);
+    }
+
+    public void visit(Chord chord) {
+        if (chord.getNotes().size() > 1) {
+            renderer.setColor(getNoteColor(chord.getNotes().peekFirst()));
+            float y = (float) (chord.getTick() - currentTick) * noteScale;
+            renderer.rect(chord.minNote * width, y, (chord.maxNote-chord.minNote)*width, 10);
+        }
+        // also draw line
     }
 
     @Override

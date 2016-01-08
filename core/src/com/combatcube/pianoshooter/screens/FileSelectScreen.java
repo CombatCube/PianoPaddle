@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.combatcube.pianoshooter.MidiFilenameFilter;
 import com.combatcube.pianoshooter.PianoShooter;
@@ -20,9 +21,13 @@ public class FileSelectScreen implements Screen {
     private FileHandle[] fileNames;
     private int selectedFile = 0;
     private boolean justTouched;
+    private OrthographicCamera camera;
 
     public FileSelectScreen(PianoShooter game) {
         this.game = game;
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 1600, 900);
+        camera.update();
         FileHandle file = Gdx.files.internal("midi");
         MidiFilenameFilter filter = new MidiFilenameFilter();
         fileNames = file.list(filter);
@@ -31,7 +36,6 @@ public class FileSelectScreen implements Screen {
 
     @Override
     public void show() {
-
     }
 
     @Override
@@ -65,6 +69,7 @@ public class FileSelectScreen implements Screen {
         } else {
             justTouched = false;
         }
+        game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         for (int i = 0; i < fileNames.length; i++) {
             FileHandle fileName = fileNames[i];
@@ -80,12 +85,11 @@ public class FileSelectScreen implements Screen {
 
     private void startGame() {
         game.setScreen(new GameScreen(game, fileNames[selectedFile].name()));
-        dispose();
     }
 
     private void changeFile(int increment) {
-        if (0 < selectedFile + increment
-                && selectedFile + increment < fileNames.length - 1) {
+        if (0 <= selectedFile + increment
+                && selectedFile + increment <= fileNames.length - 1) {
             selectedFile += increment;
         }
     }

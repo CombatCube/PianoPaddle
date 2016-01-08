@@ -64,4 +64,11 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
     public void readScore() {
         csound.ReadScore(score);
     }
+
+    @Override
+    public void stop() {
+        csound.Stop();
+    }
+
+
 }

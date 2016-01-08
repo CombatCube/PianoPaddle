@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class SoundEngine extends Thread {
+public class SoundEngine {
     public static final long MILLIS_PER_S = 1000;
     public static final int SECONDS_PER_MINUTE = 60;
     public static final int COUNT_IN = 4;
@@ -23,7 +23,8 @@ public class SoundEngine extends Thread {
     private Key key = new Key(PitchClass.C);
     private float bpm = 120;
     private long ppq = 480;
-    private double currentTick = -COUNT_IN * ppq;
+    private double currentTick;
+    public long totalTicks;
 
     private MidiFile midiFile;
     private EventMap eventMap;
@@ -71,6 +72,7 @@ public class SoundEngine extends Thread {
     }
 
     private void readNotes() {
+        currentTick = -COUNT_IN * ppq;
         eventMap = new EventMap();
         MidiTrack mainTrack = SoundEngine.getTrack(midiFile, 0);
         eventMap.addTrackEvents(mainTrack, true);
@@ -87,7 +89,8 @@ public class SoundEngine extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        midiFile.getResolution();
+//        midiFile.getResolution();
+        totalTicks = midiFile.getLengthInTicks();
         readNotes();
         csoundAdapter.load();
     }
@@ -96,32 +99,37 @@ public class SoundEngine extends Thread {
         return currentTick;
     }
 
-    @Override
     public void run() {
-        EventVisitor visitor = new PerformEventVisitor(this);
-        csoundAdapter.readScore();
-        isPlaying = true;
-        csoundAdapter.start();
-        long prevTime = TimeUtils.millis();
-        key = getFirstKeySig(eventMap);
-        Iterator<MidiEvent> it = eventMap.events.iterator();
-        MidiEvent nextEvent = it.next(); //assumes first note exists
-        while (isPlaying) {
-            long newTime = TimeUtils.millis();
-            currentTick += secondsToTicks((newTime - prevTime) / (double) MILLIS_PER_S);
-            prevTime = newTime;
-            if (nextEvent != null) {
-                if (nextEvent.getTick() < currentTick
-                        || (nextEvent instanceof KeySignature)) {
-                    nextEvent.accept(visitor);
-                    if (it.hasNext()) {
-                        nextEvent = it.next();
-                    } else {
-                        nextEvent = null;
+        final EventVisitor visitor = new PerformEventVisitor(this);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                csoundAdapter.readScore();
+                isPlaying = true;
+                csoundAdapter.start();
+                long prevTime = TimeUtils.millis();
+                key = getFirstKeySig(eventMap);
+                Iterator<MidiEvent> it = eventMap.events.iterator();
+                MidiEvent nextEvent = it.next(); //assumes first note exists
+                while (isPlaying) {
+                    long newTime = TimeUtils.millis();
+                    currentTick += secondsToTicks((newTime - prevTime) / (double) MILLIS_PER_S);
+                    prevTime = newTime;
+                    if (nextEvent != null) {
+                        if (nextEvent.getTick() < currentTick
+                                || (nextEvent instanceof KeySignature)) {
+                            nextEvent.accept(visitor);
+                            if (it.hasNext()) {
+                                nextEvent = it.next();
+                            } else {
+                                nextEvent = null;
+                            }
+                        }
                     }
                 }
+
             }
-        }
+        }).start();
     }
 
     public float getBpm() {
@@ -161,5 +169,10 @@ public class SoundEngine extends Thread {
 
     public void setKey(Key key) {
         this.key = key;
+    }
+
+    public void dispose() {
+        isPlaying = false;
+        csoundAdapter.stop();
     }
 }

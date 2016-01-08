@@ -19,6 +19,7 @@ import java.util.List;
 public class EventMap {
     public Array<MidiEvent> events;
     public Array<Note> trackNotes;
+    public Array<Chord> trackChords;
     public Array<MidiEvent> trackEvents;
     public int minNote;
     public int maxNote;
@@ -26,6 +27,7 @@ public class EventMap {
     public EventMap() {
         events = new Array<MidiEvent>();
         trackNotes = new Array<Note>();
+        trackChords = new Array<Chord>();
         trackEvents = new Array<MidiEvent>();
         minNote = Integer.MAX_VALUE;
         maxNote = Integer.MIN_VALUE;
@@ -89,7 +91,7 @@ public class EventMap {
         trackNotes.sort();
     }
 
-    public static void findIntervals(Array<Note> notes) {
+    public void findIntervals(Array<Note> notes) {
         LinkedList<Note> notesInBeat = new LinkedList<Note>();
         LinkedList<Note> chord = new LinkedList<Note>();
         long currentBeat = 0;
@@ -113,7 +115,10 @@ public class EventMap {
                 }
                 minNote = note.getNoteValue();
                 maxNote = note.getNoteValue();
-                chord.clear();
+                if (!chord.isEmpty()) {
+                    trackChords.add(new Chord(chord));
+                }
+                chord = new LinkedList<Note>();
                 chordTick = tick;
                 // Note is not in same beat
             } else {
@@ -125,7 +130,10 @@ public class EventMap {
                 }
                 minNote = note.getNoteValue();
                 maxNote = note.getNoteValue();
-                chord.clear();
+                if (!chord.isEmpty()) {
+                    trackChords.add(new Chord(chord));
+                }
+                chord = new LinkedList<Note>();
                 chordTick = tick;
                 maxInterval = 0;
                 notesInBeat.clear();
@@ -140,11 +148,6 @@ public class EventMap {
         for (Note noteInBeat : notesInBeat) {
             noteInBeat.interval = maxInterval;
         }
-    }
-
-    private class Beat {
-        private LinkedList<Note> notes;
-        private int maxInterval;
     }
 
 }

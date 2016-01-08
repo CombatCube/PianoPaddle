@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.combatcube.pianoshooter.Chord;
 import com.combatcube.pianoshooter.DrawEventVisitor;
 import com.combatcube.pianoshooter.EventMap;
 import com.combatcube.pianoshooter.Key;
@@ -31,7 +32,6 @@ public class GameScreen implements Screen {
     private static final int LATE_TIME = 100;
     private static final int POWERUP_TIME = 480; // 480 ticks = 1 quarter note
     private EventMap eventMap;
-    private int range;
 
     private OrthographicCamera camera;
     private BitmapFont font;
@@ -50,8 +50,8 @@ public class GameScreen implements Screen {
         this.game = game;
         game.soundEngine.init(filename);
         eventMap = game.soundEngine.getEventMap();
-        EventMap.findIntervals(eventMap.trackNotes);
-        range = eventMap.maxNote - eventMap.minNote;
+        eventMap.findIntervals(eventMap.trackNotes);
+        int range = eventMap.maxNote - eventMap.minNote;
         chromaticWidth = 40;
         diatonicWidth = chromaticWidth * 12 / (float) 7;
         camera = new OrthographicCamera();
@@ -67,7 +67,7 @@ public class GameScreen implements Screen {
         shooters.add(new Shooter(7, 10, chromaticWidth, 30, Color.ORANGE));
         shooters.add(new Shooter(3, 6, chromaticWidth, 20, Color.GREEN));
         shooters.add(new Shooter(0, 2, chromaticWidth, 10, Color.BLUE));
-        game.soundEngine.start();
+        game.soundEngine.run();
     }
 
     @Override
@@ -115,6 +115,10 @@ public class GameScreen implements Screen {
         drawPaddle();
 //        drawTickLine();
         game.renderer.end();
+        if (currentTick > game.soundEngine.totalTicks) {
+            game.setScreen(game.fileSelectScreen);
+            dispose();
+        }
     }
 
     @Override
@@ -134,12 +138,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
-
     }
 
     @Override
     public void dispose() {
-
+        game.soundEngine.dispose();
     }
 
     private void drawTickLine() {
@@ -181,7 +184,18 @@ public class GameScreen implements Screen {
             note.accept(drawVisitor);
         }
         for (MidiEvent event : eventMap.trackEvents) {
+            if ((event.getTick() - currentTick) * noteScale < bottomCutoff
+                    || (topCutoff < (event.getTick() - currentTick) * noteScale)) {
+                continue;
+            }
             event.accept(drawVisitor);
+        }
+        for (Chord chord : eventMap.trackChords) {
+            if ((chord.getTick() - currentTick) * noteScale < bottomCutoff
+                    || (topCutoff < (chord.getTick() - currentTick) * noteScale)) {
+                continue;
+            }
+            chord.accept(drawVisitor);
         }
     }
 

@@ -22,4 +22,6 @@ public interface EventVisitor {
     void visit(TimeSignature timeSig);
 
     void visit(Tempo tempo);
+
+    void visit(Chord chord);
 }
