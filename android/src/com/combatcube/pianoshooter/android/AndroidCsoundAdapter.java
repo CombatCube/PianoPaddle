@@ -83,6 +83,11 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
 
     }
 
+    @Override
+    public void stop() {
+        csoundObj.stop();
+    }
+
     private void initCsoundObj() {
         File opcodeDir = new File(OPCODE6DIR);
         File[] files = opcodeDir.listFiles();

@@ -1,5 +1,6 @@
 package com.combatcube.pianoshooter;
 
+import com.badlogic.gdx.utils.PauseableThread;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.leff.midi.MidiFile;
 import com.leff.midi.MidiTrack;
@@ -28,10 +29,10 @@ public class SoundEngine {
 
     private MidiFile midiFile;
     private EventMap eventMap;
-    private boolean isPlaying;
+    private PauseableThread perfThread;
+    private long prevTime = TimeUtils.millis();
 
     public SoundEngine(CsoundAdapter csoundAdapter) {
-        isPlaying = false;
         this.csoundAdapter = csoundAdapter;
     }
 
@@ -101,35 +102,29 @@ public class SoundEngine {
 
     public void run() {
         final EventVisitor visitor = new PerformEventVisitor(this);
-        new Thread(new Runnable() {
+        csoundAdapter.readScore();
+        csoundAdapter.start();
+        key = getFirstKeySig(eventMap);
+        prevTime = TimeUtils.millis();
+        perfThread = new PauseableThread(new Runnable() {
+            Iterator<MidiEvent> it = eventMap.events.iterator();
+            MidiEvent nextEvent = it.next(); //assumes first note exists
             @Override
             public void run() {
-                csoundAdapter.readScore();
-                isPlaying = true;
-                csoundAdapter.start();
-                long prevTime = TimeUtils.millis();
-                key = getFirstKeySig(eventMap);
-                Iterator<MidiEvent> it = eventMap.events.iterator();
-                MidiEvent nextEvent = it.next(); //assumes first note exists
-                while (isPlaying) {
-                    long newTime = TimeUtils.millis();
-                    currentTick += secondsToTicks((newTime - prevTime) / (double) MILLIS_PER_S);
-                    prevTime = newTime;
-                    if (nextEvent != null) {
-                        if (nextEvent.getTick() < currentTick
-                                || (nextEvent instanceof KeySignature)) {
-                            nextEvent.accept(visitor);
-                            if (it.hasNext()) {
-                                nextEvent = it.next();
-                            } else {
-                                nextEvent = null;
-                            }
-                        }
+                long newTime = TimeUtils.millis();
+                currentTick += secondsToTicks((newTime - prevTime) / (double) MILLIS_PER_S);
+                prevTime = newTime;
+                while(nextEvent != null && nextEvent.getTick() < currentTick) {
+                    nextEvent.accept(visitor);
+                    if (it.hasNext()) {
+                        nextEvent = it.next();
+                    } else {
+                        nextEvent = null;
                     }
                 }
-
             }
-        }).start();
+        });
+        perfThread.start();
     }
 
     public float getBpm() {
@@ -172,7 +167,15 @@ public class SoundEngine {
     }
 
     public void dispose() {
-        isPlaying = false;
         csoundAdapter.stop();
+    }
+
+    public void pause() {
+        perfThread.onPause();
+    }
+
+    public void resume() {
+        prevTime = TimeUtils.millis();
+        perfThread.onResume();
     }
 }

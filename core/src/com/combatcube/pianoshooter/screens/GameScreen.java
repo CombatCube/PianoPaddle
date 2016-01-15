@@ -25,7 +25,7 @@ import java.io.File;
 public class GameScreen implements Screen {
     private PianoShooter game;
 
-    public static final int SCREEN_WIDTH = 1920;
+    public static final int SCREEN_WIDTH = 1600;
     public static final int SHOOTER_SPEED = 10;
     public static final int SCREEN_HEIGHT = 900;
     private static final int EARLY_TIME = 50;
@@ -34,7 +34,7 @@ public class GameScreen implements Screen {
     private EventMap eventMap;
 
     private OrthographicCamera camera;
-    private BitmapFont font;
+    private OrthographicCamera hudCamera;
 
     private float diatonicWidth;
     private float chromaticWidth;
@@ -55,9 +55,10 @@ public class GameScreen implements Screen {
         chromaticWidth = 40;
         diatonicWidth = chromaticWidth * 12 / (float) 7;
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, (range + 1) * chromaticWidth, 900);
+        camera.setToOrtho(false, (range + 1) * chromaticWidth, SCREEN_HEIGHT);
         camera.translate(eventMap.minNote * chromaticWidth, 0);
-        font = new BitmapFont();
+        hudCamera = new OrthographicCamera();
+        hudCamera.setToOrtho(false, SCREEN_WIDTH, SCREEN_HEIGHT);
         chromaticTimer = 0;
         drawVisitor = new DrawEventVisitor(game.renderer);
         drawVisitor.screenWidth = SCREEN_WIDTH;
@@ -78,7 +79,10 @@ public class GameScreen implements Screen {
     public void render (float delta) {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.setProjectionMatrix(hudCamera.combined);
+        game.batch.begin();
+        drawScore();
+        game.batch.end();
         game.renderer.setProjectionMatrix(camera.combined);
 
         double currentTick = game.soundEngine.getCurrentTick();
@@ -101,12 +105,7 @@ public class GameScreen implements Screen {
         }
         camera.position.y = 200;
         camera.update();
-
-        game.batch.begin();
-        font.setColor(Color.YELLOW);
-        font.draw(game.batch, game.soundEngine.getKey().pitchClass.toString(), 50, 125);
-        font.draw(game.batch, "Score: " + score, 1500, 125);
-        game.batch.end();
+        hudCamera.update();
         Gdx.gl.glEnable(GL20.GL_BLEND);
 
         game.renderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -121,6 +120,11 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void drawScore() {
+        game.font.setColor(Color.YELLOW);
+        game.font.draw(game.batch, "" + score, 0, 900);
+    }
+
     @Override
     public void resize(int width, int height) {
 
@@ -128,12 +132,12 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
-
+        game.soundEngine.pause();
     }
 
     @Override
     public void resume() {
-
+        game.soundEngine.resume();
     }
 
     @Override
