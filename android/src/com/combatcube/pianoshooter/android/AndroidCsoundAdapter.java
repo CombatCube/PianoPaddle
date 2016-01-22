@@ -19,7 +19,7 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
 
     static String OPCODE6DIR;
     private CsoundObj csoundObj;
-    private CsoundMYFLTArray ampChannel;
+    private CsoundMYFLTArray distortChannel;
     private Thread perfThread;
 
     public AndroidCsoundAdapter(String nativeLibraryDir) {
@@ -30,12 +30,12 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
 
     @Override
     public void start() {
-        ampChannel = csoundObj.getInputChannelPtr("amp", controlChannelType.CSOUND_CONTROL_CHANNEL);
+        distortChannel = csoundObj.getInputChannelPtr("distort", controlChannelType.CSOUND_CONTROL_CHANNEL);
         perfThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while(!csoundObj.isStopped()) {
-                    ampChannel.SetValue(0, amp);
+                    distortChannel.SetValue(0, distort);
                 }
             }
         });

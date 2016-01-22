@@ -103,6 +103,12 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             noteScale -= 0.1f;
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+            game.soundEngine.decreaseDist();
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+            game.soundEngine.increaseDist();
+        }
         camera.position.y = 200;
         camera.update();
         hudCamera.update();
@@ -116,6 +122,7 @@ public class GameScreen implements Screen {
         game.renderer.end();
         if (currentTick > game.soundEngine.totalTicks) {
             game.setScreen(game.fileSelectScreen);
+            game.soundEngine.stopThread();
             dispose();
         }
     }
@@ -252,7 +259,7 @@ public class GameScreen implements Screen {
 //                notePatch.setColor(soundEngine.getKey().pitchToScaleDegree(pitch) != -1 ? Color.WHITE : Color.WHITE);
 //                notePatch.draw(batch, notePianoX(pitch), -200f, diatonicWidth, 150f);
                 game.renderer.setColor(Color.WHITE);
-                game.renderer.rect(notePianoX(i), -200f, diatonicWidth, 150f);
+                game.renderer.rect(notePianoX(i), -200f, diatonicWidth-1, 150f);
             }
         }
         // Black (upper) keys

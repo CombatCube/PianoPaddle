@@ -14,6 +14,7 @@ public abstract class CsoundAdapter {
             "ksmps = 32\n" +
             "nchnls = 2\n" +
             "0dbfs = 1\n" +
+            "gifn     ftgen  0,0, 257, 9, .5,1,270  ; define a sigmoid, or better \n" +
             "\n" +
             "giEngine1     fluidEngine                                            ; start fluidsynth engine\n" +
             "giEngine2     fluidEngine                                            ; start fluidsynth engine\n" +
@@ -43,17 +44,19 @@ public abstract class CsoundAdapter {
             "  endin\n" +
             "\n" +
             "  instr 99; gathering of fluidsynth audio and audio output\n" +
-            "    kamplitude1 chnget    \"amp\"\n" +
-            "    ;kamplitude1 = 1\n" +
-            "    kamplitude2 = 1\n" +
+            "    kdistort chnget    \"distort\"\n" +
+            "    kamplitude1 = 5\n" +
+            "    kamplitude2 = 5\n" +
             "    aSigL1,aSigR1      fluidOut          giEngine1; read all audio from the given soundfont\n" +
+            "    aDistL1            distort           aSigL1, kdistort, gifn\n"+
+            "    aDistR1            distort           aSigR1, kdistort, gifn\n"+
             "    aSigL2,aSigR2      fluidOut          giEngine2; read all audio from the given soundfont\n" +
-            "    outs               (aSigL1 * kamplitude1) + (aSigL2 * kamplitude2), \\\n" +
-            "                       (aSigR1 * kamplitude1) + (aSigR2 * kamplitude2)\n" +
+            "    outs               (aDistL1 * kamplitude1) + (aSigL2 * kamplitude2), \\\n" +
+            "                       (aDistR1 * kamplitude1) + (aSigR2 * kamplitude2)\n" +
             "  endin";
     protected static final String iStatement = "i %d %f %f %d %d\n";
     protected String score = "";
-    protected double amp = 1.0;
+    protected double distort = 0.0;
 
     public static MidiFile loadMidi(String fileName) throws IOException {
         Gdx.files.internal("midi/" + fileName).copyTo(Gdx.files.local("tmp/tmp.mid"));
@@ -73,8 +76,8 @@ public abstract class CsoundAdapter {
 
     public abstract void playNote(int inst, double duration, int pitch, int velocity);
 
-    public void setAmpValue(double value) {
-        amp = value;
+    public void setDistValue(double value) {
+        distort = value;
     }
 
     public abstract void readScore();

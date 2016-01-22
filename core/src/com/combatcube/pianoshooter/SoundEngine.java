@@ -178,4 +178,15 @@ public class SoundEngine {
         prevTime = TimeUtils.millis();
         perfThread.onResume();
     }
+
+    public void stopThread() {
+        perfThread.stopThread();
+    }
+
+    public void increaseDist() {
+        csoundAdapter.distort += 0.1;
+    }
+    public void decreaseDist() {
+        csoundAdapter.distort -= 0.1;
+    }
 }

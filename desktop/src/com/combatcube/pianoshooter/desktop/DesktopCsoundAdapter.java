@@ -14,7 +14,7 @@ import csnd6.controlChannelType;
 public class DesktopCsoundAdapter extends CsoundAdapter {
 
     private Csound csound;
-    private CsoundMYFLTArray ampChannel;
+    private CsoundMYFLTArray distortChannel;
     private Thread perfThread;
 
     public DesktopCsoundAdapter() {
@@ -28,15 +28,15 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
         csound.SetOption("-B2048");
         csound.CompileOrc(ORCHESTRA);
         score = "i 99 0 360; audio output instrument also keeps performance going\n";
-        ampChannel = new CsoundMYFLTArray(1);
-        csound.GetChannelPtr(ampChannel.GetPtr(), "amp",
+        distortChannel = new CsoundMYFLTArray(1);
+        csound.GetChannelPtr(distortChannel.GetPtr(), "distort",
                 controlChannelType.CSOUND_CONTROL_CHANNEL.swigValue() |
                         controlChannelType.CSOUND_INPUT_CHANNEL.swigValue());
         perfThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (csound.PerformKsmps() == 0) {
-                    ampChannel.SetValue(0, 1.0);
+                    distortChannel.SetValue(0, distort);
 //                    double val = ampChannel.GetValue(0);
 //                    System.out.println(val);
                 }
