@@ -34,7 +34,7 @@ public class PianoShooter extends Game {
         this.font = new BitmapFont(Gdx.files.internal("geo72.fnt"));
         mainMenuScreen = new MainMenuScreen(this);
         fileSelectScreen = new FileSelectScreen(this);
-        this.screen = mainMenuScreen;
+        this.screen = fileSelectScreen;
     }
 
     @Override

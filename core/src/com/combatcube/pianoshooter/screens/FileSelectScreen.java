@@ -72,13 +72,12 @@ public class FileSelectScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         for (int i = 0; i < fileNames.length; i++) {
-            FileHandle fileName = fileNames[i];
             if (i == selectedFile) {
                 game.font.setColor(Color.YELLOW);
             } else {
                 game.font.setColor(Color.WHITE);
             }
-            game.font.draw(game.batch, fileName.name(), 200, 100*(selectedFile-i) + 400);
+            game.font.draw(game.batch, fileNames[i].name(), 200, 100*(selectedFile-i) + 400);
         }
         game.batch.end();
     }

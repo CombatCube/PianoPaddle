@@ -168,6 +168,7 @@ public class SoundEngine {
 
     public void dispose() {
         csoundAdapter.stop();
+        perfThread.stopThread();
     }
 
     public void pause() {
