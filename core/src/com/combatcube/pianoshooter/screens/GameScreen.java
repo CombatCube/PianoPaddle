@@ -115,8 +115,7 @@ public class GameScreen implements Screen {
 //        drawTickLine();
         game.renderer.end();
         if (currentTick > game.soundEngine.totalTicks) {
-            game.setScreen(game.fileSelectScreen);
-            dispose();
+            game.endGame();
         }
     }
 

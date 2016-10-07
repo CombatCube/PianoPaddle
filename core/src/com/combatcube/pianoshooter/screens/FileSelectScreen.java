@@ -83,6 +83,7 @@ public class FileSelectScreen implements Screen {
     }
 
     private void startGame() {
+        game.inProgress = true;
         game.setScreen(new GameScreen(game, fileNames[selectedFile].name()));
     }
 
