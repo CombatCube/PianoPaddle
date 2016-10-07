@@ -23,6 +23,7 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
 
     @Override
     public void load() {
+        csound.SetOption("-+rtaudio=mme"); // for Windows; use CoreAudio? for Mac, PortAudio for Linux
         csound.SetOption("-odac");
         csound.SetOption("-b512");
         csound.SetOption("-B2048");
