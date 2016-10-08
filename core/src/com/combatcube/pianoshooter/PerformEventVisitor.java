@@ -37,7 +37,13 @@ public class PerformEventVisitor implements EventVisitor {
 
     @Override
     public void visit(Controller cc) {
-
+        if (cc.getControllerType() == PEDAL_EVENT) {
+            if (cc.getValue() > 64) {
+                engine.engagePedal(true);
+            } else {
+                engine.engagePedal(false);
+            }
+        }
     }
 
     @Override

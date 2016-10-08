@@ -83,6 +83,9 @@ public class EventMap {
                             trackNotes.add(note);
                         }
                     }
+                } else if (event instanceof Controller) {
+                    Controller cc = (Controller) event;
+                    events.add(cc);
                 } else {
                     events.add(event);
                     trackEvents.add(event);
