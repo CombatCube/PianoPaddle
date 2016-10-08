@@ -29,4 +29,9 @@ public class IosCsoundAdapter extends CsoundAdapter {
     public void readScore() {
 
     }
+
+    @Override
+    public void stop() {
+
+    }
 }

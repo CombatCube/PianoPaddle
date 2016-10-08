@@ -4,6 +4,8 @@ import com.badlogic.gdx.utils.PauseableThread;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.leff.midi.MidiFile;
 import com.leff.midi.MidiTrack;
+import com.leff.midi.event.ChannelEvent;
+import com.leff.midi.event.Controller;
 import com.leff.midi.event.MidiEvent;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
@@ -12,6 +14,7 @@ import com.leff.midi.event.meta.Tempo;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -26,6 +29,9 @@ public class SoundEngine {
     private long ppq = 480;
     private double currentTick;
     public long totalTicks;
+
+    public boolean pedalEngaged;
+    private HashMap<Integer, NoteOff> pendingNoteOffs = new HashMap<Integer, NoteOff>();
 
     private MidiFile midiFile;
     private EventMap eventMap;
@@ -47,6 +53,7 @@ public class SoundEngine {
             MidiEvent event = it.next();
             if (!(event instanceof NoteOn)
                     && !(event instanceof NoteOff)
+                    && !(event instanceof Controller)
                     && !(event instanceof Tempo)
                     && !(event instanceof KeySignature)) {
                 eventsToRemove.add(event);
@@ -73,12 +80,15 @@ public class SoundEngine {
     }
 
     private void readNotes() {
+        ppq = midiFile.getResolution();
         currentTick = -COUNT_IN * ppq;
         eventMap = new EventMap();
-        MidiTrack mainTrack = SoundEngine.getTrack(midiFile, 0);
+        MidiTrack metaTrack = SoundEngine.getTrack(midiFile, 0);
+        MidiTrack mainTrack = SoundEngine.getTrack(midiFile, 1);
+        eventMap.addTrackEvents(metaTrack, false);
         eventMap.addTrackEvents(mainTrack, true);
-        for (int i = 1; i < midiFile.getTrackCount(); i++) {
-            MidiTrack otherTrack = SoundEngine.getTrack(midiFile, 1);
+        for (int i = 2; i < midiFile.getTrackCount(); i++) {
+            MidiTrack otherTrack = SoundEngine.getTrack(midiFile, i);
             eventMap.addTrackEvents(otherTrack, false);
         }
     }
@@ -147,11 +157,24 @@ public class SoundEngine {
     }
 
     public void playNote(NoteOn noteOn) {
-        playNote(noteOn.getChannel(), noteOn.getNoteValue(), noteOn.getVelocity());
+        if (pedalEngaged) {
+            if (noteOn.getVelocity() == 0) {
+                pendingNoteOffs.put(noteOn.getNoteValue(), new NoteOff(noteOn.getTick(), noteOn.getChannel(), noteOn.getNoteValue(), noteOn.getVelocity()));
+            } else {
+                playNote(noteOn.getChannel(), noteOn.getNoteValue(), noteOn.getVelocity());
+                pendingNoteOffs.remove(noteOn.getNoteValue());
+            }
+        } else {
+            playNote(noteOn.getChannel(), noteOn.getNoteValue(), noteOn.getVelocity());
+        }
     }
 
     public void playNote(NoteOff noteOff) {
-        playNote(noteOff.getChannel(), noteOff.getNoteValue(), 0);
+        if (pedalEngaged) {
+            pendingNoteOffs.put(noteOff.getNoteValue(), noteOff);
+        } else {
+            playNote(noteOff.getChannel(), noteOff.getNoteValue(), 0);
+        }
     }
 
     public EventMap getEventMap() {
@@ -178,5 +201,18 @@ public class SoundEngine {
     public void resume() {
         prevTime = TimeUtils.millis();
         perfThread.onResume();
+    }
+
+    public void engagePedal(boolean b) {
+        pedalEngaged = b;
+        if (!b) {
+            for(NoteOff noteOff : pendingNoteOffs.values()) {
+                playNote(noteOff.getChannel(), noteOff.getNoteValue(), 0);
+            }
+        }
+    }
+
+    public void setPpq(int ppq) {
+        this.ppq = ppq;
     }
 }

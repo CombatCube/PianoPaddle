@@ -16,6 +16,8 @@
 
 package com.leff.midi.event;
 
+import com.combatcube.pianoshooter.EventVisitor;
+
 public class Controller extends ChannelEvent
 {
     public Controller(long tick, int channel, int controllerType, int value)
@@ -47,4 +49,10 @@ public class Controller extends ChannelEvent
     {
         mValue2 = v;
     }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

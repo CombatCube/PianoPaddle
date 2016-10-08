@@ -71,7 +71,7 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
                         ORCHESTRA + "\n" +
                         "</CsInstruments>\n" +
                         "<CsScore>\n" +
-                        "i 99 0 360; audio output instrument also keeps performance going\n" +
+                        "i 99 0 2147483647; audio output instrument also keeps performance going\n" +
                         score + "\n" +
                         "e\n" +
                         "</CsScore>\n" +

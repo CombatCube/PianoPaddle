@@ -2,6 +2,7 @@ package com.combatcube.pianoshooter;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.leff.midi.event.Controller;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
 import com.leff.midi.event.meta.KeySignature;
@@ -38,7 +39,7 @@ public class DrawEventVisitor implements EventVisitor {
                 } else if (note.interval < 15) {
                     return Color.PINK;
                 } else {
-                    return Color.BLACK;
+                    return Color.PINK; // TODO: differentiate?
                 }
 //            } else {
 //                // Out of key
@@ -80,6 +81,11 @@ public class DrawEventVisitor implements EventVisitor {
 
     @Override
     public void visit(NoteOff noteOff) {
+
+    }
+
+    @Override
+    public void visit(Controller cc) {
 
     }
 

@@ -2,6 +2,7 @@ package com.combatcube.pianoshooter;
 
 import com.badlogic.gdx.utils.Array;
 import com.leff.midi.MidiTrack;
+import com.leff.midi.event.Controller;
 import com.leff.midi.event.MidiEvent;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
@@ -71,7 +72,8 @@ public class EventMap {
                 } else if (event instanceof NoteOff) {
                     NoteOff noteOff = (NoteOff) event;
                     int noteValue = noteOff.getNoteValue();
-                    if (noteOns.get(noteValue) != null) {
+                    if (noteOns.get(noteValue) != null
+                            && !noteOns.get(noteValue).isEmpty()) {
                         NoteOn noteOn = noteOns.get(noteValue).removeFirst();
                         Note note = new Note(noteOn, noteOff.getTick() - noteOn.getTick());
                         note.scaleDegree = key.pitchToScaleDegree(note.getNoteValue());

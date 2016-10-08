@@ -1,5 +1,6 @@
 package com.combatcube.pianoshooter;
 
+import com.leff.midi.event.Controller;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
 import com.leff.midi.event.meta.KeySignature;
@@ -16,6 +17,8 @@ public interface EventVisitor {
     void visit(NoteOn noteOn);
 
     void visit(NoteOff noteOff);
+
+    void visit(Controller cc);
 
     void visit(KeySignature keySig);
 

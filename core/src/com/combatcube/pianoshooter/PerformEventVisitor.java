@@ -1,5 +1,6 @@
 package com.combatcube.pianoshooter;
 
+import com.leff.midi.event.Controller;
 import com.leff.midi.event.NoteOff;
 import com.leff.midi.event.NoteOn;
 import com.leff.midi.event.meta.KeySignature;
@@ -11,6 +12,7 @@ import com.leff.midi.event.meta.TimeSignature;
  * Created by andrew on 12/29/2015.
  */
 public class PerformEventVisitor implements EventVisitor {
+    private final int PEDAL_EVENT = 64;
     private SoundEngine engine;
 
     public PerformEventVisitor(SoundEngine engine) {
@@ -31,6 +33,11 @@ public class PerformEventVisitor implements EventVisitor {
     @Override
     public void visit(NoteOff noteOff) {
         engine.playNote(noteOff);
+    }
+
+    @Override
+    public void visit(Controller cc) {
+
     }
 
     @Override
