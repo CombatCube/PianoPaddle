@@ -195,10 +195,15 @@ public class SoundEngine {
     }
 
     public void pause() {
+        csoundAdapter.stop();
         perfThread.onPause();
     }
 
     public void resume() {
+        csoundAdapter.init();
+        csoundAdapter.load();
+        csoundAdapter.readScore();
+        csoundAdapter.start();
         prevTime = TimeUtils.millis();
         perfThread.onResume();
     }

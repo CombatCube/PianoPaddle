@@ -52,6 +52,16 @@ public class DesktopCsoundAdapter extends CsoundAdapter {
     }
 
     @Override
+    public void pause() {
+        // FIXME
+    }
+
+    @Override
+    public void resume() {
+        // FIXME
+    }
+
+    @Override
     public double getTime() {
         return csound.GetScoreTime();
     }

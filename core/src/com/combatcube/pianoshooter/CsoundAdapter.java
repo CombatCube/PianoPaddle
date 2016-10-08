@@ -68,6 +68,8 @@ public abstract class CsoundAdapter {
     }
 
     public abstract void start();
+    public abstract void pause();
+    public abstract void resume();
     public abstract double getTime();
     public abstract void load();
 

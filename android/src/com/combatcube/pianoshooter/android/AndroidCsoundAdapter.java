@@ -44,6 +44,16 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
     }
 
     @Override
+    public void pause() {
+        csoundObj.pause();
+    }
+
+    @Override
+    public void resume() {
+        csoundObj.play();
+    }
+
+    @Override
     public double getTime() {
         return csoundObj.getCsound().GetScoreTime();
     }
