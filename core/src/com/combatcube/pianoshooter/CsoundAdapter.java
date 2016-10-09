@@ -44,7 +44,7 @@ public abstract class CsoundAdapter {
             "\n" +
             "  instr 99; gathering of fluidsynth audio and audio output\n" +
             "    kamplitude1 chnget    \"amp\"\n" +
-            "    ;kamplitude1 = 1\n" +
+            "    kamplitude1 = 1\n" +
             "    kamplitude2 = 1\n" +
             "    aSigL1,aSigR1      fluidOut          giEngine1; read all audio from the given soundfont\n" +
             "    aSigL2,aSigR2      fluidOut          giEngine2; read all audio from the given soundfont\n" +

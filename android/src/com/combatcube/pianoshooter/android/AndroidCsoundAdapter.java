@@ -34,11 +34,12 @@ public class AndroidCsoundAdapter extends CsoundAdapter {
         perfThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!csoundObj.isStopped()) {
-                    ampChannel.SetValue(0, amp);
-                }
+//                while(!csoundObj.isStopped()) {
+//                    ampChannel.SetValue(0, amp);
+//                }
             }
         });
+        ampChannel.SetValue(0, 1.0f);
         csoundObj.play();
         perfThread.start();
     }
