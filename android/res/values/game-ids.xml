@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Google Play game services IDs.
+Save this file as res/values/games-ids.xml in your project.
+-->
+<resources>
+    <string name="app_id">591472558369</string>
+    <string name="achievement_flawless">CgkIoYKMtJsREAIQAA</string>
+    <string name="achievement_quasi_una_fantasia">CgkIoYKMtJsREAIQAQ</string>
+    <string name="achievement_virtuoso">CgkIoYKMtJsREAIQAg</string>
+    <string name="achievement_dexterity">CgkIoYKMtJsREAIQAw</string>
+    <string name="achievement_stage_fright">CgkIoYKMtJsREAIQBA</string>
+    <string name="leaderboard_alla_turca">CgkIoYKMtJsREAIQBQ</string>
+    <string name="leaderboard_bwv_934">CgkIoYKMtJsREAIQBg</string>
+    <string name="leaderboard_flight_of_the_bumblebee">CgkIoYKMtJsREAIQBw</string>
+    <string name="leaderboard_fr_elise">CgkIoYKMtJsREAIQCA</string>
+    <string name="leaderboard_gymnopdie_no._1">CgkIoYKMtJsREAIQCQ</string>
+    <string name="leaderboard_maple_leaf_rag">CgkIoYKMtJsREAIQCg</string>
+    <string name="leaderboard_moonlight_sonata_mvt._3">CgkIoYKMtJsREAIQCw</string>
+    <string name="leaderboard_nocturne">CgkIoYKMtJsREAIQDA</string>
+    <string name="leaderboard_the_entertainer">CgkIoYKMtJsREAIQDQ</string>
+</resources>

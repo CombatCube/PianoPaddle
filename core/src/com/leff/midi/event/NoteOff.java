@@ -16,7 +16,7 @@
 
 package com.leff.midi.event;
 
-import com.combatcube.pianoshooter.EventVisitor;
+import com.combatcube.pianopaddle.EventVisitor;
 
 public class NoteOff extends ChannelEvent
 {

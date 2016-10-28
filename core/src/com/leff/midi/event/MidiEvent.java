@@ -16,7 +16,7 @@
 
 package com.leff.midi.event;
 
-import com.combatcube.pianoshooter.EventVisitor;
+import com.combatcube.pianopaddle.EventVisitor;
 import com.leff.midi.event.meta.MetaEvent;
 import com.leff.midi.util.VariableLengthInt;
 
