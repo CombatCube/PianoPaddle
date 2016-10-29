@@ -16,6 +16,7 @@ import com.combatcube.pianopaddle.screens.MainMenuScreen;
  */
 public class PianoPaddle extends Game implements InputProcessor {
 
+    public static PlayServices playServices;
     public SpriteBatch batch;
     public ShapeRenderer renderer;
     public BitmapFont font;
@@ -24,8 +25,9 @@ public class PianoPaddle extends Game implements InputProcessor {
     private MainMenuScreen mainMenuScreen;
     public boolean inProgress = false;
 
-    public PianoPaddle(CsoundAdapter csoundAdapter) {
+    public PianoPaddle(CsoundAdapter csoundAdapter, PlayServices playServices) {
         this.soundEngine = new SoundEngine(csoundAdapter);
+        this.playServices = playServices;
     }
 
     @Override

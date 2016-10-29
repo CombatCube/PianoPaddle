@@ -13,6 +13,7 @@ public class Note extends NoteOn {
     public boolean passed;
     public boolean touched;
     public boolean missed;
+    public boolean late;
     public int interval;
 
     public Note(NoteOn noteOn, long duration) {
@@ -23,6 +24,7 @@ public class Note extends NoteOn {
         this.passed = false;
         this.touched = false;
         this.missed = false;
+        this.late = false;
         this.interval = 0;
     }
 

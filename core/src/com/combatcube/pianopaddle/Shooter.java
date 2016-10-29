@@ -35,7 +35,7 @@ public class Shooter {
     public void draw(ShapeRenderer renderer) {
         renderer.setColor(color);
         renderer.rect(rect.getX(),
-                rect.getY(),
+                rect.getY() + 30,
                 rect.getWidth(),
                 rect.getHeight());
     }

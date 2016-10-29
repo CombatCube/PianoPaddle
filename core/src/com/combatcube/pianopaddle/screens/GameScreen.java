@@ -2,6 +2,7 @@ package com.combatcube.pianopaddle.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.combatcube.pianopaddle.Chord;
+import com.combatcube.pianopaddle.Constants;
 import com.combatcube.pianopaddle.DrawEventVisitor;
 import com.combatcube.pianopaddle.EventMap;
 import com.combatcube.pianopaddle.Key;
@@ -17,6 +19,8 @@ import com.combatcube.pianopaddle.Note;
 import com.combatcube.pianopaddle.PianoPaddle;
 import com.combatcube.pianopaddle.Shooter;
 import com.leff.midi.event.MidiEvent;
+
+import static com.combatcube.pianopaddle.PianoPaddle.playServices;
 
 public class GameScreen implements Screen {
     private PianoPaddle game;
@@ -41,9 +45,15 @@ public class GameScreen implements Screen {
     private boolean chromatic;
     private double chromaticTimer;
     private DrawEventVisitor drawVisitor;
+    private int currentStreak = 0;
+    private int multiplier = 1;
+    private int missStreak = 0;
+    private boolean perfect = true;
+    private String songName;
 
     public GameScreen(final PianoPaddle game, String filename) {
         this.game = game;
+        songName = filename;
         game.soundEngine.init(filename);
         eventMap = game.soundEngine.getEventMap();
         eventMap.findIntervals(eventMap.trackNotes);
@@ -78,6 +88,7 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(hudCamera.combined);
         game.batch.begin();
         drawScore();
+        drawStreak();
         game.batch.end();
         game.renderer.setProjectionMatrix(camera.combined);
 
@@ -111,6 +122,24 @@ public class GameScreen implements Screen {
 //        drawTickLine();
         game.renderer.end();
         if (currentTick > game.soundEngine.totalTicks) {
+            if (perfect) {
+                playServices.unlockAchievement("CgkIoYKMtJsREAIQAA");
+            }
+            Preferences prefs = Gdx.app.getPreferences("PlayedSongs");
+            if (!prefs.contains(songName)) {
+                playServices.incrementAchievement("CgkIoYKMtJsREAIQAg", 1);
+                prefs.putInteger(songName, score);
+            } else {
+                int prevScore = prefs.getInteger(songName);
+                if (score >= prevScore) {
+                    prefs.putInteger(songName, score);
+                }
+            }
+            if (songName.equals("Moonlight_Sonata.mid")) {
+                playServices.unlockAchievement("CgkIoYKMtJsREAIQAQ");
+            }
+            prefs.flush();
+            playServices.submitScore(Constants.myMap.get(songName), score);
             game.endGame();
         }
     }
@@ -118,6 +147,11 @@ public class GameScreen implements Screen {
     private void drawScore() {
         game.font.setColor(Color.YELLOW);
         game.font.draw(game.batch, "" + score, 0, 900);
+    }
+
+    private void drawStreak() {
+        game.font.setColor(Color.YELLOW);
+        game.font.draw(game.batch, currentStreak + ": " + multiplier + "x", 800, 900);
     }
 
     @Override
@@ -163,12 +197,17 @@ public class GameScreen implements Screen {
                     && note.getTick() - EARLY_TIME <= currentTick
                     && currentTick < note.getTick() + LATE_TIME) {
                 for (Shooter shooter : shooters) {
-                    if (shooter.contains(note)) {
+                    if (shooter.contains(note) && !note.touched) {
                         note.touched = true;
                         if (note.passed) {
+                            // TODO: Add "late" text
                             game.soundEngine.playNote(note.getChannel(), note.getNoteValue(), note.originalVelocity);
+                            note.late = true;
+                            score += 30 * multiplier;
+                        } else {
+                            score += 50 * multiplier;
                         }
-                        score += 50;
+                        incrementStreak();
                     }
                 }
                 if (!note.touched && !note.passed) {
@@ -179,6 +218,9 @@ public class GameScreen implements Screen {
             if (!note.touched
                     && note.getTick() + LATE_TIME < currentTick) {
                 note.missed = true;
+                perfect = false;
+                // TODO: Add "miss" text
+                incrementMissStreak();
             }
             note.accept(drawVisitor);
         }
@@ -195,6 +237,31 @@ public class GameScreen implements Screen {
                 continue;
             }
             chord.accept(drawVisitor);
+        }
+    }
+
+    private void incrementMissStreak() {
+        currentStreak = 0;
+        missStreak += 1;
+        if (missStreak >= 50) {
+            playServices.unlockAchievement("CgkIoYKMtJsREAIQBA");
+        }
+    }
+
+    private void incrementStreak() {
+        missStreak = 0;
+        currentStreak += 1;
+        if (currentStreak < 10) {
+            multiplier = 1;
+        } else if (10 <= currentStreak && currentStreak < 20) {
+            multiplier = 2;
+        } else if (20 <= currentStreak && currentStreak < 30) {
+            multiplier = 3;
+        } else {
+            multiplier = 4;
+        }
+        if (currentStreak >= 100) {
+            playServices.unlockAchievement("CgkIoYKMtJsREAIQAw");
         }
     }
 

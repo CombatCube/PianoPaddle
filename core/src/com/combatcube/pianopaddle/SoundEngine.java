@@ -134,7 +134,7 @@ public class SoundEngine {
                     }
                 }
                 try {
-                    sleep(10);
+                    sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

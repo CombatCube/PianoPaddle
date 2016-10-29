@@ -27,7 +27,11 @@ public class DrawEventVisitor implements EventVisitor {
 
     public static Color getNoteColor(Note note) {
         if (note.touched) {
-            return Color.LIGHT_GRAY;
+            if (note.late) {
+                return Color.GOLD;
+            } else {
+                return Color.LIGHT_GRAY;
+            }
         } else if (!note.missed) {
 //            if (note.scaleDegree != -1) {
                 if (note.interval < 3) {
