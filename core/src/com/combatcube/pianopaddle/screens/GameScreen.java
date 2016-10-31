@@ -125,7 +125,12 @@ public class GameScreen implements Screen {
             if (perfect) {
                 playServices.unlockAchievement("CgkIoYKMtJsREAIQAA");
             }
-            Preferences prefs = Gdx.app.getPreferences("PlayedSongs");
+            Preferences prefs;
+            if (playServices.isSignedIn()) {
+                 prefs = Gdx.app.getPreferences(playServices.getPlayerId());
+            } else {
+                prefs = Gdx.app.getPreferences("me");
+            }
             if (!prefs.contains(songName)) {
                 playServices.incrementAchievement("CgkIoYKMtJsREAIQAg", 1);
                 prefs.putInteger(songName, score);

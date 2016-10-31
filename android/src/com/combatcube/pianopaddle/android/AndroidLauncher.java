@@ -18,10 +18,10 @@ public class AndroidLauncher extends AndroidApplication implements PlayServices 
     public boolean signInFailed = false;
     public boolean signInSucceeded = false;
 
-	@Override
+    @Override
 	protected void onCreate (Bundle savedInstanceState) {
         gameHelper = new GameHelper(this, GameHelper.CLIENT_GAMES);
-        gameHelper.enableDebugLog(false);
+        gameHelper.enableDebugLog(true);
 
         GameHelper.GameHelperListener gameHelperListener = new GameHelper.GameHelperListener()
         {
@@ -44,6 +44,25 @@ public class AndroidLauncher extends AndroidApplication implements PlayServices 
         AndroidCsoundAdapter csoundAdapter = new AndroidCsoundAdapter(getBaseContext().getApplicationInfo().nativeLibraryDir);
         initialize(new PianoPaddle(csoundAdapter, this), config);
 	}
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        gameHelper.onStart(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gameHelper.onStop();
+    }
+
+    @Override
+    protected void onActivityResult(int request, int response, Intent data) {
+        super.onActivityResult(request, response, data);
+        gameHelper.onActivityResult(request, response, data);
+    }
+
 
     @Override
     public void signIn() {
@@ -73,6 +92,8 @@ public class AndroidLauncher extends AndroidApplication implements PlayServices 
                 @Override
                 public void run()
                 {
+                    signInSucceeded = false;
+                    signInFailed = false;
                     gameHelper.signOut();
                 }
             });
@@ -139,6 +160,16 @@ public class AndroidLauncher extends AndroidApplication implements PlayServices 
 
     @Override
     public boolean isSignedIn() {
-        return gameHelper.isSignedIn();
+        return gameHelper.isSignedIn() || signInSucceeded;
+    }
+
+    @Override
+    public boolean hasSignInError() {
+        return gameHelper.hasSignInError();
+    }
+
+    @Override
+    public String getPlayerId() {
+        return Games.Players.getCurrentPlayerId(gameHelper.getApiClient());
     }
 }

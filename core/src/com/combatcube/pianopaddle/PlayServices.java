@@ -14,4 +14,6 @@ public interface PlayServices {
     void showAchievement();
     void showScore(String id);
     boolean isSignedIn();
+    boolean hasSignInError();
+    String getPlayerId();
 }

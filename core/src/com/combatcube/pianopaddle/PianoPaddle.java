@@ -3,11 +3,13 @@ package com.combatcube.pianopaddle;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.combatcube.pianopaddle.screens.FileSelectScreen;
 import com.combatcube.pianopaddle.screens.MainMenuScreen;
 
 /**
@@ -22,6 +24,7 @@ public class PianoPaddle extends Game implements InputProcessor {
     public BitmapFont font;
     public SoundEngine soundEngine;
     public Screen fileSelectScreen;
+    public InputMultiplexer multiplexer;
     private MainMenuScreen mainMenuScreen;
     public boolean inProgress = false;
 
@@ -32,7 +35,8 @@ public class PianoPaddle extends Game implements InputProcessor {
 
     @Override
     public void create() {
-        Gdx.input.setInputProcessor(this);
+        multiplexer = new InputMultiplexer();
+        Gdx.input.setInputProcessor(multiplexer);
         Gdx.input.setCatchBackKey(true);
         this.batch = new SpriteBatch();
         this.renderer = new ShapeRenderer();
@@ -60,6 +64,12 @@ public class PianoPaddle extends Game implements InputProcessor {
         if(keycode == Input.Keys.BACK || keycode == Input.Keys.ESCAPE){
             if (inProgress) {
                 endGame();
+            }
+            else if (screen == fileSelectScreen) {
+                setScreen(mainMenuScreen);
+            }
+            else if (screen == mainMenuScreen ){
+                Gdx.app.exit();
             }
         }
         return false;

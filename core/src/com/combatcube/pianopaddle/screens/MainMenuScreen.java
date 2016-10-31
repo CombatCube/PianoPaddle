@@ -4,17 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.combatcube.pianopaddle.PianoPaddle;
-import com.combatcube.pianopaddle.PlayServices;
 
 
 /**
@@ -60,7 +55,8 @@ public class MainMenuScreen implements Screen {
         signInStatusLabel = new Label(getSignInText(), labelStyle);
 
         stage = new Stage();
-        Gdx.input.setInputProcessor(stage);
+        game.multiplexer.addProcessor(stage);
+        game.multiplexer.addProcessor(game);
 
         table = new Table();
         table.setFillParent(true);
@@ -71,6 +67,7 @@ public class MainMenuScreen implements Screen {
         stack.add(signOutButton);
 
         table.add(playButton).width(400).space(40);
+        table.row();
         table.row();
         table.add(stack).width(400).space(40);
         table.row();
@@ -109,6 +106,8 @@ public class MainMenuScreen implements Screen {
     private String getSignInText() {
         if (PianoPaddle.playServices.isSignedIn()) {
             return "Signed in.";
+        } else if (PianoPaddle.playServices.hasSignInError()) {
+            return "Error signing in.";
         } else {
             return "Not signed in.";
         }
