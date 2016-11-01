@@ -8,7 +8,16 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.combatcube.pianopaddle.MidiFilenameFilter;
 import com.combatcube.pianopaddle.PianoPaddle;
 
@@ -21,76 +30,72 @@ public class FileSelectScreen implements Screen {
     private int selectedFile = 0;
     private boolean justTouched;
     private OrthographicCamera camera;
+    private Stage stage;
+    private Table table;
+    private Table container;
+    private TextureAtlas atlas;
+    private TextButton.TextButtonStyle textButtonStyle;
+    private ScrollPane scrollPane;
 
     public FileSelectScreen(PianoPaddle game) {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1600, 900);
         camera.update();
-        FileHandle file = Gdx.files.internal("midi");
         MidiFilenameFilter filter = new MidiFilenameFilter();
-        fileNames = file.list(filter);
-        justTouched = true;
+        fileNames = Gdx.files.internal("midi").list(filter);
+
+        textButtonStyle = new TextButton.TextButtonStyle();
+        textButtonStyle.font = game.font;
+
+        stage = new Stage();
+
+        table = new Table();
+        table.setDebug(true);
+        table.align(Align.center);
+
+        container = new Table();
+        container.setFillParent(true);
+
+        scrollPane = new ScrollPane(table);
+
+        table.add();
+        table.row();
+        for (FileHandle fileHandle : fileNames) {
+            final String name = fileHandle.name();
+            TextButton button = new TextButton(fileHandle.nameWithoutExtension().replace('_', ' '), textButtonStyle);
+            button.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    startGame(name);
+                }
+            });
+            table.add(button).align(Align.left).space(100);
+            table.row();
+        }
+        table.add();
+
+        stage.addActor(container);
+        container.add(scrollPane);
     }
 
     @Override
     public void show() {
+        game.multiplexer.addProcessor(stage);
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            changeFile(-1);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            changeFile(1);
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            startGame();
-        }
-        if (Gdx.input.isTouched()) {
-            if (!justTouched) {
-                justTouched = true;
-                Vector3 mousePos = new Vector3();
-                mousePos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-                if (0 < mousePos.y && mousePos.y < Gdx.graphics.getHeight()/3) {
-                    changeFile(-1);
-                }
-                if (Gdx.graphics.getHeight()/3 < mousePos.y && mousePos.y < 2*Gdx.graphics.getHeight()/3) {
-                    startGame();
-                }
-                if (2*Gdx.graphics.getHeight()/3 < mousePos.y && mousePos.y < Gdx.graphics.getHeight()) {
-                    changeFile(1);
-                }
-            }
-        } else {
-            justTouched = false;
-        }
-        game.batch.setProjectionMatrix(camera.combined);
-        game.batch.begin();
-        for (int i = 0; i < fileNames.length; i++) {
-            if (i == selectedFile) {
-                game.font.setColor(Color.YELLOW);
-            } else {
-                game.font.setColor(Color.WHITE);
-            }
-            game.font.draw(game.batch, fileNames[i].name(), 200, 100*(selectedFile-i) + 400);
-        }
-        game.batch.end();
+        scrollPane.validate();
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
     }
 
-    private void startGame() {
+    private void startGame(String name) {
         game.inProgress = true;
-        game.setScreen(new GameScreen(game, fileNames[selectedFile].name()));
-    }
-
-    private void changeFile(int increment) {
-        if (0 <= selectedFile + increment
-                && selectedFile + increment <= fileNames.length - 1) {
-            selectedFile += increment;
-        }
+        game.setScreen(new GameScreen(game, name));
     }
 
     @Override
@@ -110,7 +115,7 @@ public class FileSelectScreen implements Screen {
 
     @Override
     public void hide() {
-
+        game.multiplexer.removeProcessor(stage);
     }
 
     @Override

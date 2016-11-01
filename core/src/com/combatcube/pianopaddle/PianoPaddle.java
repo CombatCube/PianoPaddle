@@ -8,7 +8,9 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.combatcube.pianopaddle.screens.FileSelectScreen;
 import com.combatcube.pianopaddle.screens.MainMenuScreen;
 
@@ -21,6 +23,8 @@ public class PianoPaddle extends Game implements InputProcessor {
     public static PlayServices playServices;
     public SpriteBatch batch;
     public ShapeRenderer renderer;
+    public Skin skin;
+    private TextureAtlas atlas;
     public BitmapFont font;
     public SoundEngine soundEngine;
     public Screen fileSelectScreen;
@@ -36,11 +40,15 @@ public class PianoPaddle extends Game implements InputProcessor {
     @Override
     public void create() {
         multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(this);
         Gdx.input.setInputProcessor(multiplexer);
         Gdx.input.setCatchBackKey(true);
         this.batch = new SpriteBatch();
         this.renderer = new ShapeRenderer();
         this.font = new BitmapFont(Gdx.files.internal("geo72.fnt"));
+        this.atlas = new TextureAtlas(Gdx.files.internal("uiskin.atlas"));
+        this.skin = new Skin(Gdx.files.internal("uiskin.json"), atlas);
+        skin.add("geo72", font);
         mainMenuScreen = new MainMenuScreen(this);
         fileSelectScreen = new com.combatcube.pianopaddle.screens.FileSelectScreen(this);
         this.screen = mainMenuScreen;

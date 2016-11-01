@@ -27,9 +27,7 @@ public class MainMenuScreen implements Screen {
 
     private Table table;
     private Table googlePlayTable;
-    private Skin skin;
     private Stack stack;
-    private TextureAtlas atlas;
     private Label.LabelStyle labelStyle;
     private TextButton.TextButtonStyle textButtonStyle;
     private OrthographicCamera camera;
@@ -49,11 +47,8 @@ public class MainMenuScreen implements Screen {
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 1600, 900);
-        atlas = new TextureAtlas(Gdx.files.internal("uiskin.atlas"));
-        skin = new Skin(Gdx.files.internal("uiskin.json"), atlas);
-        skin.add("geo72", game.font);
 
-        textButtonStyle = skin.get("default", TextButton.TextButtonStyle.class);
+        textButtonStyle = game.skin.get("default", TextButton.TextButtonStyle.class);
         textButtonStyle.font = game.font;
 
         Texture googlePlayTexture = new Texture(Gdx.files.internal("ic_play_games_badge_green.png"));
@@ -66,8 +61,7 @@ public class MainMenuScreen implements Screen {
         leaderboardsImage = new Image(leaderboardsTexture);
         leaderboardsImage.setScaling(Scaling.fit);
 
-
-        labelStyle = skin.get("default", Label.LabelStyle.class);
+        labelStyle = game.skin.get("default", Label.LabelStyle.class);
         labelStyle.font = game.font;
 
         titleLabel = new Label("PianoPaddle", labelStyle);
@@ -81,7 +75,6 @@ public class MainMenuScreen implements Screen {
         signInStatusLabel = new Label(getSignInText(), labelStyle);
 
         stage = new Stage();
-        game.multiplexer.addProcessor(game);
         game.multiplexer.addProcessor(stage);
 
         table = new Table();

@@ -23,11 +23,12 @@ public class SoundEngine {
     public static final long MILLIS_PER_S = 1000;
     public static final int SECONDS_PER_MINUTE = 60;
     public static final int COUNT_IN = 4;
+    public static final int COUNT_OUT = 2;
     private CsoundAdapter csoundAdapter;
 
     private Key key = new Key(PitchClass.C);
     private float bpm = 120;
-    private long ppq = 480;
+    public long ppq = 480;
     private double currentTick;
     public long totalTicks;
 

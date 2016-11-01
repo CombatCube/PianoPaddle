@@ -18,6 +18,7 @@ import com.combatcube.pianopaddle.Key;
 import com.combatcube.pianopaddle.Note;
 import com.combatcube.pianopaddle.PianoPaddle;
 import com.combatcube.pianopaddle.Shooter;
+import com.combatcube.pianopaddle.SoundEngine;
 import com.leff.midi.event.MidiEvent;
 
 import static com.combatcube.pianopaddle.PianoPaddle.playServices;
@@ -121,7 +122,7 @@ public class GameScreen implements Screen {
         drawPaddle();
 //        drawTickLine();
         game.renderer.end();
-        if (currentTick > game.soundEngine.totalTicks) {
+        if (currentTick > game.soundEngine.totalTicks + SoundEngine.COUNT_OUT * game.soundEngine.ppq) {
             if (perfect) {
                 playServices.unlockAchievement("CgkIoYKMtJsREAIQAA");
             }
