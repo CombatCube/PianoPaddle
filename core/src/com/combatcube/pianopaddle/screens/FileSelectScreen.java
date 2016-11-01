@@ -51,7 +51,7 @@ public class FileSelectScreen implements Screen {
         stage = new Stage();
 
         table = new Table();
-        table.setDebug(true);
+        table.setDebug(false);
         table.align(Align.center);
 
         container = new Table();
