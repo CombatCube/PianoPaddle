@@ -59,6 +59,7 @@ nb-configuration.xml
 .gradle
 gradle-app.setting
 build/
+keystore.properties
 
 ## OS Specific
 .DS_Store
