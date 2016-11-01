@@ -222,7 +222,8 @@ public class GameScreen implements Screen {
                 }
             }
             if (!note.touched
-                    && note.getTick() + LATE_TIME < currentTick) {
+                    && note.getTick() + LATE_TIME < currentTick
+                    && !note.missed) {
                 note.missed = true;
                 perfect = false;
                 // TODO: Add "miss" text
