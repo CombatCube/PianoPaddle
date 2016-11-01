@@ -146,10 +146,10 @@ public class AndroidLauncher extends AndroidApplication implements PlayServices 
     }
 
     @Override
-    public void showScore(String id) {
+    public void showScore() {
         if (isSignedIn())
         {
-            startActivityForResult(Games.Leaderboards.getLeaderboardIntent(gameHelper.getApiClient(), id), requestCode);
+            startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(gameHelper.getApiClient()), requestCode);
         }
         else
         {

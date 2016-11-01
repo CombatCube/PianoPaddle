@@ -12,7 +12,7 @@ public interface PlayServices {
     void incrementAchievement(String id, int amount);
     void submitScore(String id, int highScore);
     void showAchievement();
-    void showScore(String id);
+    void showScore();
     boolean isSignedIn();
     boolean hasSignInError();
     String getPlayerId();
